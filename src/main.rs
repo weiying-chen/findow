@@ -34,14 +34,10 @@ fn build_ui(app: &Application) {
     gtk_box.append(&button);
     input.connect_activate(move |entry| {
         let input_text = entry.text();
-
-        if input_text.is_empty() {
-            println!("empt!");
-        } else {
-            println!("{}", input_text);
-        }
-
-        let cmd = format!("xdotool search --name {} windowactivate", input_text);
+        let cmd = format!(
+            "xdotool search --onlyvisible --name {} windowactivate",
+            input_text
+        );
 
         std::process::Command::new("sh")
             .arg("-c")
