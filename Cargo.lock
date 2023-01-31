@@ -231,7 +231,7 @@ dependencies = [
  "futures-core",
  "futures-executor",
  "futures-task",
- "glib-macros",
+ "glib-macros 0.15.11",
  "glib-sys",
  "gobject-sys",
  "libc",
@@ -245,6 +245,21 @@ name = "glib-macros"
 version = "0.15.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "25a68131a662b04931e71891fb14aaf65ee4b44d08e8abc10f49e77418c86c64"
+dependencies = [
+ "anyhow",
+ "heck",
+ "proc-macro-crate",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "glib-macros"
+version = "0.16.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e084807350b01348b6d9dbabb724d1a0bb987f47a2c85de200e98e12e30733bf"
 dependencies = [
  "anyhow",
  "heck",
@@ -724,6 +739,7 @@ checksum = "9e79c4d996edb816c91e4308506774452e55e95c3c9de07b6729e17e15a5ef81"
 name = "ui-demo"
 version = "0.1.0"
 dependencies = [
+ "glib-macros 0.16.3",
  "gtk4",
  "rand",
 ]

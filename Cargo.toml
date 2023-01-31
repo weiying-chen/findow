@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 rand = "0.8.5"
 gtk = { version = "0.4.7", package = "gtk4" }
+glib-macros = "0.16.3"

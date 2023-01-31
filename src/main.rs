@@ -1,3 +1,5 @@
+use glib_macros::clone;
+use gtk::glib;
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, Orientation};
 
@@ -30,9 +32,15 @@ fn build_ui(app: &Application) {
         .orientation(Orientation::Vertical)
         .build();
 
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("gtk-app")
+        .child(&gtk_box)
+        .build();
+
     gtk_box.append(&input);
     gtk_box.append(&button);
-    input.connect_activate(move |entry| {
+    input.connect_activate(clone!(@weak window => move |entry| {
         let input_text = entry.text();
         let cmd = format!(
             "xdotool search --onlyvisible --name {} windowactivate",
@@ -44,13 +52,8 @@ fn build_ui(app: &Application) {
             .arg(cmd)
             .spawn()
             .unwrap();
-    });
 
-    let window = ApplicationWindow::builder()
-        .application(app)
-        .title("gtk-app")
-        .child(&gtk_box)
-        .build();
-
+        window.close();
+    }));
     window.present();
 }
