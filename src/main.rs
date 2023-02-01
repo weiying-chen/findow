@@ -36,6 +36,7 @@ fn build_ui(app: &Application) {
         .application(app)
         .title("gtk-app")
         .child(&gtk_box)
+        .decorated(false)
         .build();
 
     gtk_box.append(&input);
