@@ -58,9 +58,9 @@ fn build_ui(app: &Application) {
 
         if !output.status.success() {
             println!("stderr: {}", String::from_utf8_lossy(&output.stderr).trim());
+        } else {
+            println!("stdout: {}", String::from_utf8_lossy(&output.stdout).trim());
         }
-
-        println!("stdout: {}", String::from_utf8_lossy(&output.stdout).trim());
 
         let cmd = format!(
             "xdotool getwindowname {}",
@@ -75,9 +75,9 @@ fn build_ui(app: &Application) {
 
         if !output.status.success() {
             println!("stderr1: {}", String::from_utf8_lossy(&output.stderr).trim());
+        } else {
+            println!("stdout: {}", String::from_utf8_lossy(&output.stdout).trim());
         }
-
-        println!("stdout: {}", String::from_utf8_lossy(&output.stdout).trim());
 
         window.close();
     }));
