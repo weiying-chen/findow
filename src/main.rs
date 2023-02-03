@@ -45,38 +45,58 @@ fn build_ui(app: &Application) {
 
     input.connect_activate(clone!(@weak window => move |entry| {
         let input_text = entry.text();
+
+        // TODO: This could be a function
+
         let cmd = format!(
             "xdotool search --onlyvisible --name {}",
             input_text
         );
 
-        let output = Command::new("sh")
+        let window_id_output = Command::new("sh")
             .arg("-c")
             .arg(cmd)
             .output()
             .expect("Failed to execute proccess.");
 
-        if !output.status.success() {
-            println!("stderr: {}", String::from_utf8_lossy(&output.stderr).trim());
+        if window_id_output.status.success() {
+            println!("window_id: {}", String::from_utf8_lossy(&window_id_output.stdout).trim());
         } else {
-            println!("stdout: {}", String::from_utf8_lossy(&output.stdout).trim());
+            println!("stderr: {}", String::from_utf8_lossy(&window_id_output.stderr).trim());
         }
 
         let cmd = format!(
             "xdotool getwindowname {}",
-            String::from_utf8_lossy(&output.stdout).trim()
+            String::from_utf8_lossy(&window_id_output.stdout).trim()
         );
 
-        let output = Command::new("sh")
+        let window_name_output = Command::new("sh")
             .arg("-c")
             .arg(cmd)
             .output()
             .expect("Failed to execute proccess.");
 
-        if !output.status.success() {
-            println!("stderr1: {}", String::from_utf8_lossy(&output.stderr).trim());
+        if window_name_output.status.success() {
+            println!("window_name: {}", String::from_utf8_lossy(&window_name_output.stdout).trim());
         } else {
-            println!("stdout: {}", String::from_utf8_lossy(&output.stdout).trim());
+            println!("stderr: {}", String::from_utf8_lossy(&window_name_output.stderr).trim());
+        }
+
+        let cmd = format!(
+            "xprop -id {} | grep WM_CLASS",
+            String::from_utf8_lossy(&window_id_output.stdout).trim()
+        );
+
+        let window_class_output = Command::new("sh")
+            .arg("-c")
+            .arg(cmd)
+            .output()
+            .expect("Failed to execute proccess.");
+
+        if window_class_output.status.success() {
+            println!("window_class: {}", String::from_utf8_lossy(&window_class_output.stdout).trim());
+        } else {
+            println!("stderr: {}", String::from_utf8_lossy(&window_class_output.stderr).trim());
         }
 
         window.close();
