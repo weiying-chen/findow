@@ -13,6 +13,21 @@ fn main() {
     app.run();
 }
 
+fn run_command(command: &str) -> String {
+    // let cmd = format!("{} {}", command, input_text);
+    let output = Command::new("sh")
+        .arg("-c")
+        .arg(command)
+        .output()
+        .expect("Failed to execute proccess.");
+
+    if output.status.success() {
+        String::from_utf8_lossy(&output.stdout).trim().to_owned()
+    } else {
+        String::from_utf8_lossy(&output.stderr).trim().to_owned()
+    }
+}
+
 fn build_ui(app: &Application) {
     let input = gtk::Entry::builder()
         .placeholder_text("input")
@@ -44,61 +59,27 @@ fn build_ui(app: &Application) {
     gtk_box.append(&button);
 
     input.connect_activate(clone!(@weak window => move |entry| {
-        let input_text = entry.text();
-
         // TODO: This could be a function
 
-        let cmd = format!(
-            "xdotool search --onlyvisible --name {}",
-            input_text
-        );
+        // "xdotool search --onlyvisible --name {}",
+        // "xdotool getwindowname {}",
+        // "xprop -id {} | grep WM_CLASS",
 
-        let window_id_output = Command::new("sh")
-            .arg("-c")
-            .arg(cmd)
-            .output()
-            .expect("Failed to execute proccess.");
+        let input_text = entry.text();
+        let command = format!("xdotool search --onlyvisible --name {}", input_text);
+        let window_id_output = run_command(&command);
 
-        if window_id_output.status.success() {
-            println!("window_id: {}", String::from_utf8_lossy(&window_id_output.stdout).trim());
-        } else {
-            println!("stderr: {}", String::from_utf8_lossy(&window_id_output.stderr).trim());
-        }
+        println!("window_id: {}", window_id_output);
 
-        let cmd = format!(
-            "xdotool getwindowname {}",
-            String::from_utf8_lossy(&window_id_output.stdout).trim()
-        );
+        let command = format!("xdotool getwindowname {}", window_id_output);
+        let window_name_output = run_command(&command);
 
-        let window_name_output = Command::new("sh")
-            .arg("-c")
-            .arg(cmd)
-            .output()
-            .expect("Failed to execute proccess.");
+        println!("window_name: {}", window_name_output);
 
-        if window_name_output.status.success() {
-            println!("window_name: {}", String::from_utf8_lossy(&window_name_output.stdout).trim());
-        } else {
-            println!("stderr: {}", String::from_utf8_lossy(&window_name_output.stderr).trim());
-        }
+        // let command = "xprop -id {} | grep WM_CLASS";
+        // let window_class_output = run_command(&command, &window_id_output);
 
-        let cmd = format!(
-            "xprop -id {} | grep WM_CLASS",
-            String::from_utf8_lossy(&window_id_output.stdout).trim()
-        );
-
-        let window_class_output = Command::new("sh")
-            .arg("-c")
-            .arg(cmd)
-            .output()
-            .expect("Failed to execute proccess.");
-
-        if window_class_output.status.success() {
-            println!("window_class: {}", String::from_utf8_lossy(&window_class_output.stdout).trim());
-        } else {
-            println!("stderr: {}", String::from_utf8_lossy(&window_class_output.stderr).trim());
-        }
-
+        // println!("window_class: {}", window_class_output);
         window.close();
     }));
 
