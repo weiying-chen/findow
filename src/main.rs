@@ -76,10 +76,10 @@ fn build_ui(app: &Application) {
 
         println!("window_name: {}", window_name_output);
 
-        // let command = "xprop -id {} | grep WM_CLASS";
-        // let window_class_output = run_command(&command, &window_id_output);
+        let command = format!("xprop -id {} | grep WM_CLASS", window_id_output);
+        let window_class_output = run_command(&command);
 
-        // println!("window_class: {}", window_class_output);
+        println!("window_class: {}", window_class_output);
         window.close();
     }));
 
