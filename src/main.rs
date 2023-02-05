@@ -46,6 +46,13 @@ fn build_ui(app: &Application) {
 
         println!("output.stdout: {}", String::from_utf8_lossy(&output.stdout));
 
+        let output = Command::new("wmctrl")
+            .arg("-l")
+            .output()
+            .expect("Failed to execute wmctrl command");
+
+        println!("output.stdout: {}", String::from_utf8_lossy(&output.stdout));
+
         // `window.close()` sometimes won't bring the matched window to the front.
         window.hide();
     }));
