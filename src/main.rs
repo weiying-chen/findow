@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow};
-use std::process::{Command, Output};
+use std::process::Command;
 
 fn main() {
     let app = Application::builder()
@@ -11,12 +11,18 @@ fn main() {
     app.run();
 }
 
-fn wmctrl(args: &str) -> Output {
-    Command::new("sh")
+fn run_command(command: &str) -> String {
+    let output = Command::new("sh")
         .arg("-c")
-        .arg(format!("wmctrl {}", args))
+        .arg(command)
         .output()
-        .unwrap_or_else(|_| panic!("Failed to execute `wmctrl {}`", args))
+        .expect("Failed to execute proccess.");
+
+    if output.status.success() {
+        String::from_utf8_lossy(&output.stdout).trim().to_owned()
+    } else {
+        String::from_utf8_lossy(&output.stderr).trim().to_owned()
+    }
 }
 
 fn build_ui(app: &Application) {
@@ -45,16 +51,28 @@ fn build_ui(app: &Application) {
     input.connect_activate(move |entry| {
         let input_text = entry.text();
 
-        // println!("input_text: {}", input_text);
+        let command = format!("xdotool search --onlyvisible --name {}", input_text);
+        let window_id_output = run_command(&command);
 
-        let output = wmctrl(&format!("-a {}", input_text));
+        println!("window_id: {}", window_id_output);
 
-        if output.status.success() {
-            println!("output: {}", String::from_utf8_lossy(&output.stdout));
-            window.hide();
-            window.close();
-        } else {
-            println!("output error: {}", output.status);
-        }
+        let command = format!("xdotool getwindowname {}", window_id_output);
+        let window_name_output = run_command(&command);
+
+        println!("window_name: {}", window_name_output);
+
+        let command = format!("xprop -id {} | grep WM_CLASS", window_id_output);
+        let window_class_output = run_command(&command);
+
+        println!("window_class: {}", window_class_output);
+
+        // `xdotool windowactivate` doesn't produce any output
+        let command = format!("xdotool windowactivate {}", window_id_output);
+        let window_activate_output = run_command(&command);
+
+        println!("window_activate: {}", window_activate_output);
+
+        window.hide();
+        window.close();
     });
 }
