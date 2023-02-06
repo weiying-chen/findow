@@ -1,7 +1,5 @@
-use glib_macros::clone;
-use gtk::glib;
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Orientation};
+use gtk::{Application, ApplicationWindow};
 use std::process::Command;
 
 fn main() {
@@ -22,40 +20,31 @@ fn build_ui(app: &Application) {
         .margin_end(12)
         .build();
 
-    let gtk_box = gtk::Box::builder()
-        .orientation(Orientation::Vertical)
-        .build();
-
     let window = ApplicationWindow::builder()
         .application(app)
         .title("gtk-app")
-        .child(&gtk_box)
-        .decorated(false)
+        .child(&input)
         .build();
 
-    gtk_box.append(&input);
+    window.show_all();
 
-    input.connect_activate(clone!(@weak window => move |entry| {
+    input.connect_activate(move |entry| {
         let input_text = entry.text();
+        println!("ls {}", input_text);
 
-        let output = Command::new("wmctrl")
-            .arg("-a")
-            .arg(input_text)
-            .output()
-            .expect("Failed to execute wmctrl command");
-
-        println!("output.stdout: {}", String::from_utf8_lossy(&output.stdout));
-
-        let output = Command::new("wmctrl")
-            .arg("-l")
-            .output()
-            .expect("Failed to execute wmctrl command");
-
-        println!("output.stdout: {}", String::from_utf8_lossy(&output.stdout));
-
-        // `window.close()` sometimes won't bring the matched window to the front.
-        window.hide();
-    }));
-
-    window.show();
+        match Command::new("ls").arg(input_text).output() {
+            Ok(output) => {
+                if output.status.success() {
+                    print!("output: {}", String::from_utf8_lossy(&output.stdout));
+                    window.hide();
+                    window.close();
+                } else {
+                    println!("output error: {}", output.status);
+                }
+            }
+            Err(e) => {
+                println!("Err: {}", e);
+            }
+        }
+    });
 }
