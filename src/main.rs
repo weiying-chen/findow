@@ -36,10 +36,16 @@ fn build_ui(app: &Application) {
 
     window.show_all();
 
-    input.connect_activate(move |entry| {
+    input.connect_changed(|entry| {
         let input_text = entry.text();
 
         println!("input_text: {}", input_text);
+    });
+
+    input.connect_activate(move |entry| {
+        let input_text = entry.text();
+
+        // println!("input_text: {}", input_text);
 
         let output = wmctrl(&format!("-a {}", input_text));
 
