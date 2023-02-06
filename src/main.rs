@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow};
-use std::process::Command;
+use std::process::{Command, Output};
 
 fn main() {
     let app = Application::builder()
@@ -9,6 +9,14 @@ fn main() {
 
     app.connect_activate(build_ui);
     app.run();
+}
+
+fn wmctrl(args: &str) -> Output {
+    Command::new("sh")
+        .arg("-c")
+        .arg(format!("wmctrl {}", args))
+        .output()
+        .unwrap_or_else(|_| panic!("Failed to execute `wmctrl {}`", args))
 }
 
 fn build_ui(app: &Application) {
@@ -33,22 +41,14 @@ fn build_ui(app: &Application) {
 
         println!("input_text: {}", input_text);
 
-        let command = format!("wmctrl -a {}", input_text);
+        let output = wmctrl(&format!("-a {}", input_text));
 
-        match Command::new("sh").arg("-c").arg(command).output() {
-            Ok(output) => {
-                if output.status.success() {
-                    println!("output: {}", String::from_utf8_lossy(&output.stdout));
-                    window.hide();
-                    window.close();
-                } else {
-                    println!("output error: {}", output.status);
-                }
-            }
-
-            Err(e) => {
-                println!("Err: {}", e);
-            }
+        if output.status.success() {
+            println!("output: {}", String::from_utf8_lossy(&output.stdout));
+            window.hide();
+            window.close();
+        } else {
+            println!("output error: {}", output.status);
         }
     });
 }
