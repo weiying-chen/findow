@@ -30,18 +30,22 @@ fn build_ui(app: &Application) {
 
     input.connect_activate(move |entry| {
         let input_text = entry.text();
-        println!("ls {}", input_text);
 
-        match Command::new("ls").arg(input_text).output() {
+        println!("input_text: {}", input_text);
+
+        let command = format!("wmctrl -a {}", input_text);
+
+        match Command::new("sh").arg("-c").arg(command).output() {
             Ok(output) => {
                 if output.status.success() {
-                    print!("output: {}", String::from_utf8_lossy(&output.stdout));
+                    println!("output: {}", String::from_utf8_lossy(&output.stdout));
                     window.hide();
                     window.close();
                 } else {
                     println!("output error: {}", output.status);
                 }
             }
+
             Err(e) => {
                 println!("Err: {}", e);
             }
