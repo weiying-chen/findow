@@ -1,6 +1,8 @@
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow};
-use std::process::Command;
+use std::cell::RefCell;
+use std::process::{Command, Output};
+use std::rc::Rc;
 
 fn main() {
     let app = Application::builder()
@@ -11,18 +13,12 @@ fn main() {
     app.run();
 }
 
-fn run_command(command: &str) -> String {
-    let output = Command::new("sh")
+fn run_command(command: &str) -> Output {
+    Command::new("sh")
         .arg("-c")
         .arg(command)
         .output()
-        .expect("Failed to execute proccess.");
-
-    if output.status.success() {
-        String::from_utf8_lossy(&output.stdout).trim().to_owned()
-    } else {
-        String::from_utf8_lossy(&output.stderr).trim().to_owned()
-    }
+        .unwrap_or_else(|_| panic!("failed to execute {}'", command))
 }
 
 fn build_ui(app: &Application) {
@@ -42,35 +38,43 @@ fn build_ui(app: &Application) {
 
     window.show_all();
 
-    input.connect_changed(|entry| {
-        let input_text = entry.text();
+    let shared_var = Rc::new(RefCell::new(String::new()));
+    let shared_var_ref = Rc::clone(&shared_var);
 
-        println!("input_text: {}", input_text);
-    });
-
-    input.connect_activate(move |entry| {
+    input.connect_changed(move |entry| {
         let input_text = entry.text();
 
         let command = format!("xdotool search --onlyvisible --name {}", input_text);
         let window_id_output = run_command(&command);
 
-        println!("window_id: {}", window_id_output);
+        if window_id_output.status.success() {
+            println!(
+                "stdout: {}",
+                String::from_utf8_lossy(&window_id_output.stdout)
+            );
 
-        let command = format!("xdotool getwindowname {}", window_id_output);
-        let window_name_output = run_command(&command);
+            let mut shared = shared_var_ref.borrow_mut();
 
-        println!("window_name: {}", window_name_output);
+            *shared = String::from_utf8_lossy(&window_id_output.stdout).to_string()
+        } else {
+            println!(
+                "sterr: {}",
+                String::from_utf8_lossy(&window_id_output.stderr)
+            );
+        }
+    });
 
-        let command = format!("xprop -id {} | grep WM_CLASS", window_id_output);
-        let window_class_output = run_command(&command);
+    let shared_var_ref = Rc::clone(&shared_var);
 
-        println!("window_class: {}", window_class_output);
+    input.connect_activate(move |entry| {
+        let input_text = entry.text();
+        let shared = shared_var_ref.borrow();
 
-        // `xdotool windowactivate` doesn't produce any output
-        let command = format!("xdotool windowactivate {}", window_id_output);
+        // // `xdotool windowactivate` doesn't produce any output
+        let command = format!("xdotool windowactivate {:?}", shared);
         let window_activate_output = run_command(&command);
 
-        println!("window_activate: {}", window_activate_output);
+        println!("window_activate: {:?}", window_activate_output);
 
         window.hide();
         window.close();
