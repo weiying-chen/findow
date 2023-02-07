@@ -36,16 +36,16 @@ fn build_ui(app: &Application) {
         .child(&input)
         .build();
 
-    window.show_all();
+    let window_id_output_rc = Rc::new(RefCell::new(String::new()));
+    let window_id_output_clone = Rc::clone(&window_id_output_rc);
 
-    let shared_var = Rc::new(RefCell::new(String::new()));
-    let shared_var_ref = Rc::clone(&shared_var);
+    window.show_all();
 
     input.connect_changed(move |entry| {
         let input_text = entry.text();
-
         let command = format!("xdotool search --onlyvisible --name {}", input_text);
         let window_id_output = run_command(&command);
+        let mut window_id_output_string = window_id_output_clone.borrow_mut();
 
         if window_id_output.status.success() {
             println!(
@@ -53,9 +53,7 @@ fn build_ui(app: &Application) {
                 String::from_utf8_lossy(&window_id_output.stdout)
             );
 
-            let mut shared = shared_var_ref.borrow_mut();
-
-            *shared = String::from_utf8_lossy(&window_id_output.stdout).to_string()
+            *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string()
         } else {
             println!(
                 "sterr: {}",
@@ -64,14 +62,14 @@ fn build_ui(app: &Application) {
         }
     });
 
-    let shared_var_ref = Rc::clone(&shared_var);
+    let window_id_output_clone = Rc::clone(&window_id_output_rc);
 
-    input.connect_activate(move |entry| {
-        let input_text = entry.text();
-        let shared = shared_var_ref.borrow();
+    input.connect_activate(move |_| {
+        // let input_text = entry.text();
+        let window_id_output_string = window_id_output_clone.borrow();
 
         // // `xdotool windowactivate` doesn't produce any output
-        let command = format!("xdotool windowactivate {:?}", shared);
+        let command = format!("xdotool windowactivate {:?}", window_id_output_string);
         let window_activate_output = run_command(&command);
 
         println!("window_activate: {:?}", window_activate_output);
