@@ -65,14 +65,12 @@ fn build_ui(app: &Application) {
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
 
     input.connect_activate(move |_| {
-        // let input_text = entry.text();
         let window_id_output_string = window_id_output_clone.borrow();
 
-        // // `xdotool windowactivate` doesn't produce any output
-        let command = format!("xdotool windowactivate {:?}", window_id_output_string);
+        let command = format!("xdotool windowactivate {}", window_id_output_string);
         let window_activate_output = run_command(&command);
 
-        println!("window_activate: {:?}", window_activate_output);
+        println!("window_activate: {}", window_activate_output.status);
 
         window.hide();
         window.close();
