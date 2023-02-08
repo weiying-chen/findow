@@ -48,17 +48,11 @@ fn build_ui(app: &Application) {
         let mut window_id_output_string = window_id_output_clone.borrow_mut();
 
         if window_id_output.status.success() {
-            println!(
-                "stdout: {}",
-                String::from_utf8_lossy(&window_id_output.stdout)
-            );
-
-            *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string()
+            *window_id_output_string =
+                String::from_utf8_lossy(&window_id_output.stdout).to_string();
+            println!("window_id_output (success): {:?}", window_id_output);
         } else {
-            println!(
-                "sterr: {}",
-                String::from_utf8_lossy(&window_id_output.stderr)
-            );
+            println!("window_id-output (failure): {:?}", window_id_output);
         }
     });
 
@@ -66,12 +60,10 @@ fn build_ui(app: &Application) {
 
     input.connect_activate(move |_| {
         let window_id_output_string = window_id_output_clone.borrow();
-
         let command = format!("xdotool windowactivate {}", window_id_output_string);
         let window_activate_output = run_command(&command);
 
-        println!("window_activate: {}", window_activate_output.status);
-
+        println!("window_activate: {:?}", window_activate_output);
         window.hide();
         window.close();
     });
