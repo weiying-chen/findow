@@ -21,6 +21,14 @@ fn run_command(command: &str) -> Output {
         .unwrap_or_else(|_| panic!("failed to execute {}'", command))
 }
 
+fn print_output(name: &str, output: &Output) {
+    if output.status.success() {
+        println!("{} (success): {:?}", name, output);
+    } else {
+        println!("{} (failure): {:?}", name, output);
+    }
+}
+
 fn build_ui(app: &Application) {
     let input = gtk::Entry::builder()
         .placeholder_text("input")
@@ -47,24 +55,14 @@ fn build_ui(app: &Application) {
         let command = format!("xdotool search --onlyvisible --name {}", input_text);
         let window_id_output = run_command(&command);
 
-        if window_id_output.status.success() {
-            *window_id_output_string =
-                String::from_utf8_lossy(&window_id_output.stdout).to_string();
-
-            println!("window_id_output (success): {:?}", window_id_output);
-        } else {
-            println!("window_id_output (failure): {:?}", window_id_output);
-        }
+        print_output("window_id_output", &window_id_output);
+        *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
 
         // TODO: This fails when window_id_output has two ids
         let command = format!("xdotool getwindowname {}", window_id_output_string);
         let window_name_output = run_command(&command);
 
-        if window_name_output.status.success() {
-            println!("window_name_output (success): {:?}", window_name_output);
-        } else {
-            println!("window_name_output (failure): {:?}", window_name_output);
-        }
+        print_output("window_name_output", &window_name_output);
     });
 
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
@@ -74,18 +72,7 @@ fn build_ui(app: &Application) {
         let command = format!("xdotool windowactivate {}", window_id_output_string);
         let window_activate_output = run_command(&command);
 
-        if window_activate_output.status.success() {
-            println!(
-                "window_activate_output (success): {:?}",
-                window_activate_output
-            );
-        } else {
-            println!(
-                "window_activate_output (failure): {:?}",
-                window_activate_output
-            );
-        }
-
+        print_output("window_activate_output", &window_activate_output);
         window.hide();
         window.close();
     });
