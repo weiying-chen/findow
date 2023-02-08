@@ -42,17 +42,28 @@ fn build_ui(app: &Application) {
     window.show_all();
 
     input.connect_changed(move |entry| {
+        let mut window_id_output_string = window_id_output_clone.borrow_mut();
         let input_text = entry.text();
         let command = format!("xdotool search --onlyvisible --name {}", input_text);
         let window_id_output = run_command(&command);
-        let mut window_id_output_string = window_id_output_clone.borrow_mut();
 
         if window_id_output.status.success() {
             *window_id_output_string =
                 String::from_utf8_lossy(&window_id_output.stdout).to_string();
+
             println!("window_id_output (success): {:?}", window_id_output);
         } else {
-            println!("window_id-output (failure): {:?}", window_id_output);
+            println!("window_id_output (failure): {:?}", window_id_output);
+        }
+
+        // TODO: This fails when window_id_output has two ids
+        let command = format!("xdotool getwindowname {}", window_id_output_string);
+        let window_name_output = run_command(&command);
+
+        if window_name_output.status.success() {
+            println!("window_name_output (success): {:?}", window_name_output);
+        } else {
+            println!("window_name_output (failure): {:?}", window_name_output);
         }
     });
 
@@ -63,7 +74,18 @@ fn build_ui(app: &Application) {
         let command = format!("xdotool windowactivate {}", window_id_output_string);
         let window_activate_output = run_command(&command);
 
-        println!("window_activate: {:?}", window_activate_output);
+        if window_activate_output.status.success() {
+            println!(
+                "window_activate_output (success): {:?}",
+                window_activate_output
+            );
+        } else {
+            println!(
+                "window_activate_output (failure): {:?}",
+                window_activate_output
+            );
+        }
+
         window.hide();
         window.close();
     });
