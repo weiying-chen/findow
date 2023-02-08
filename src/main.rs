@@ -58,11 +58,19 @@ fn build_ui(app: &Application) {
         print_output("window_id_output", &window_id_output);
         *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
 
-        // TODO: This fails when window_id_output has two ids
-        let command = format!("xdotool getwindowname {}", window_id_output_string);
-        let window_name_output = run_command(&command);
+        // TODO: What if there are no matching windows?
+        for window_id in window_id_output_string.split("\n") {
+            if !window_id.is_empty() {
+                // TODO: Should fix this because because it fails when `window_id_output` has two ids.
+                let command = format!("xdotool getwindowname {}", window_id);
+                let window_name_output = run_command(&command);
 
-        print_output("window_name_output", &window_name_output);
+                println!(
+                    "window_name_output: {}",
+                    String::from_utf8_lossy(&window_name_output.stdout)
+                );
+            }
+        }
     });
 
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
