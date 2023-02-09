@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow};
+use gtk::{Application, ApplicationWindow, Box, Label, ListBox, ListBoxRow};
 use std::cell::RefCell;
 use std::process::{Command, Output};
 use std::rc::Rc;
@@ -30,6 +30,11 @@ fn print_output(name: &str, output: &Output) {
 }
 
 fn build_ui(app: &Application) {
+    let label = Label::new(None);
+    let list_box = ListBox::new();
+    let list_box_row = ListBoxRow::new();
+    let vbox = Box::new(gtk::Orientation::Vertical, 10);
+
     let input = gtk::Entry::builder()
         .placeholder_text("input")
         .margin_top(12)
@@ -38,10 +43,16 @@ fn build_ui(app: &Application) {
         .margin_end(12)
         .build();
 
+    list_box_row.add(&label);
+    list_box.add(&list_box_row);
+
+    vbox.pack_start(&input, false, false, 0);
+    vbox.pack_start(&list_box, true, true, 0);
+
     let window = ApplicationWindow::builder()
         .application(app)
         .title("gtk-app")
-        .child(&input)
+        .child(&vbox)
         .build();
 
     let window_id_output_rc = Rc::new(RefCell::new(String::new()));
@@ -58,19 +69,27 @@ fn build_ui(app: &Application) {
         print_output("window_id_output", &window_id_output);
         *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
 
-        // TODO: What if there are no matching windows?
-        for window_id in window_id_output_string.split("\n") {
-            if !window_id.is_empty() {
-                // TODO: Should fix this because because it fails when `window_id_output` has two ids.
-                let command = format!("xdotool getwindowname {}", window_id);
-                let window_name_output = run_command(&command);
+        label.set_text("Test text");
 
-                println!(
-                    "window_name_output: {}",
-                    String::from_utf8_lossy(&window_name_output.stdout)
-                );
-            }
-        }
+        // TODO: Check the result of the split
+        // See if can use filter like suggested in Reddit
+
+        // for window_id in window_id_output_string.split("\n") {
+        //     if !window_id.is_empty() {
+        //         // TODO: Should fix this because because it fails when `window_id_output` has two ids.
+        //         let command = format!("xdotool getwindowname {}", window_id);
+        //         let window_name_output = run_command(&command);
+        //         let window_name = String::from_utf8_lossy(&window_name_output.stdout).to_string();
+        //         let label = Label::new(None);
+
+        //         label.set_text(&window_name);
+
+        //         let list_box_row = ListBoxRow::new();
+
+        //         list_box_row.add(&label);
+        //         list_box.add(&list_box_row);
+        //     }
+        // }
     });
 
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
