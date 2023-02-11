@@ -4,10 +4,10 @@ use std::cell::RefCell;
 use std::process::{Command, Output};
 use std::rc::Rc;
 
+const APP_ID: &str = "com.weiyingchen.ui-demo";
+
 fn main() {
-    let app = Application::builder()
-        .application_id("com.jwestall.ui-demo")
-        .build();
+    let app = Application::builder().application_id(APP_ID).build();
 
     app.connect_activate(build_ui);
     app.run();
