@@ -30,9 +30,13 @@ fn print_output(name: &str, output: &Output) {
 }
 
 fn build_ui(app: &Application) {
-    let label = Label::new(None);
-    let list_box = ListBox::new();
     let list_box_row = ListBoxRow::new();
+    let label = Label::new(Some("83823"));
+    let list_box = ListBox::new();
+
+    list_box_row.add(&label);
+    list_box.add(&list_box_row);
+
     let vbox = Box::new(gtk::Orientation::Vertical, 10);
 
     let input = gtk::Entry::builder()
@@ -42,9 +46,6 @@ fn build_ui(app: &Application) {
         .margin_start(12)
         .margin_end(12)
         .build();
-
-    list_box_row.add(&label);
-    list_box.add(&list_box_row);
 
     vbox.pack_start(&input, false, false, 0);
     vbox.pack_start(&list_box, true, true, 0);
@@ -61,15 +62,38 @@ fn build_ui(app: &Application) {
     window.show_all();
 
     input.connect_changed(move |entry| {
-        let mut window_id_output_string = window_id_output_clone.borrow_mut();
         let input_text = entry.text();
         let command = format!("xdotool search --onlyvisible --name {}", input_text);
         let window_id_output = run_command(&command);
 
         print_output("window_id_output", &window_id_output);
+
+        let mut window_id_output_string = window_id_output_clone.borrow_mut();
+
         *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
 
-        label.set_text("Test text");
+        for row in list_box.children() {
+            list_box.remove(&row)
+        }
+
+        let label = Label::new(Some("231312"));
+        let list_box_row = ListBoxRow::new();
+
+        list_box_row.add(&label);
+        list_box.add(&list_box_row);
+
+        // This is necessary because here `list_box_row` has been added dynamically.
+        list_box.show_all();
+
+        // let window_id_array: Vec<&str> = window_id_output_string.split("\n").collect();
+
+        // for window_id in window_id_array {
+        //     let label = Label::new(Some(window_id));
+        //     let list_box_row = ListBoxRow::new();
+
+        //     list_box_row.add(&label);
+        //     list_box.add(&list_box_row);
+        // }
 
         // TODO: Check the result of the split
         // See if can use filter like suggested in Reddit
