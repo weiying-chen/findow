@@ -23,9 +23,9 @@ fn run_command(command: &str) -> Output {
 
 fn print_output(name: &str, output: &Output) {
     if output.status.success() {
-        println!("{} (success): {:?}", name, output);
+        println!("{} (success): {:#?}", name, output);
     } else {
-        println!("{} (failure): {:?}", name, output);
+        println!("{} (failure): {:#?}", name, output);
     }
 }
 
