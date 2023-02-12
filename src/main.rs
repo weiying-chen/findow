@@ -75,7 +75,6 @@ fn build_ui(app: &Application) {
             let command = format!("xdotool getwindowname {}", window_id);
             let window_name_output = run_command(&command);
             let window_name = String::from_utf8_lossy(&window_name_output.stdout).to_string();
-
             let label = Label::new(Some(&window_name));
             let list_box_row = ListBoxRow::new();
 
