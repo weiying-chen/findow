@@ -51,10 +51,10 @@ fn build_ui(app: &Application) {
         .child(&vbox)
         .build();
 
+    window.show_all();
+
     let window_id_output_rc = Rc::new(RefCell::new(String::new()));
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
-
-    window.show_all();
 
     input.connect_changed(move |entry| {
         let input_text = entry.text();
@@ -72,6 +72,7 @@ fn build_ui(app: &Application) {
         }
 
         for window_id in window_id_output_string.split("\n") {
+            // TODO: handle empty `input_text`.
             let command = format!("xdotool getwindowname {}", window_id);
             let window_name_output = run_command(&command);
             let window_name = String::from_utf8_lossy(&window_name_output.stdout).to_string();
@@ -84,9 +85,6 @@ fn build_ui(app: &Application) {
 
         // This is necessary because here `list_box_row` has been added dynamically.
         list_box.show_all();
-
-        // TODO: Check the result of the split
-        // See if can use filter like suggested in Reddit
     });
 
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
