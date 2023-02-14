@@ -15,7 +15,6 @@ use std::rc::Rc;
 // const APP_ID: &str = "com.weiyingchen.ui-demo";
 
 fn main() {
-    // let app = Application::builder().application_id(APP_ID).build();
     let app = Application::new(Some("com.github.css"), Default::default());
 
     app.connect_startup(|app| {
@@ -32,7 +31,6 @@ fn main() {
         build_ui(app);
     });
 
-    // app.connect_activate(build_ui);
     app.run();
 }
 
@@ -89,7 +87,10 @@ fn build_ui(app: &Application) {
             list_box.remove(&row);
         }
 
-        for window_id in window_id_output_string.split("\n") {
+        for window_id in window_id_output_string
+            .split("\n")
+            .filter(|s| !s.is_empty())
+        {
             // TODO: handle empty `input_text`.
             let command = format!("xdotool getwindowname {}", window_id);
             let window_name_output = run_command(&command);
