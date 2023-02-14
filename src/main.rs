@@ -62,7 +62,7 @@ fn build_ui(app: &Application) {
     let vbox = Box_::new(Orientation::Vertical, 0);
 
     //TODO: rename to entry
-    let input = Entry::new();
+    let entry = Entry::new();
 
     // let input = gtk::Entry::builder()
     //     .placeholder_text("input")
@@ -85,7 +85,7 @@ fn build_ui(app: &Application) {
     // .child(&list_box)
     // .build();
 
-    vbox.append(&input);
+    vbox.append(&entry);
     vbox.append(&list_box);
 
     window.set_child(Some(&vbox));
@@ -97,7 +97,7 @@ fn build_ui(app: &Application) {
     let window_id_output_rc = Rc::new(RefCell::new(String::new()));
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
 
-    input.connect_changed(move |entry| {
+    entry.connect_changed(move |entry| {
         let input_text = entry.text();
         let command = format!("xdotool search --onlyvisible --name {}", input_text);
         let window_id_output = run_command(&command);
@@ -133,7 +133,7 @@ fn build_ui(app: &Application) {
 
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
 
-    input.connect_activate(clone!(@weak window => move |_| {
+    entry.connect_activate(clone!(@weak window => move |_| {
         let window_id_output_string = window_id_output_clone.borrow();
         let command = format!("xdotool windowactivate {}", window_id_output_string);
         let window_activate_output = run_command(&command);
