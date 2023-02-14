@@ -2,11 +2,10 @@ use glib::clone;
 use gtk::gdk::Display;
 use gtk::glib;
 use gtk::prelude::*;
-use gtk::Orientation;
 
 use gtk::{
-    Application, ApplicationWindow, Box as Box_, CssProvider, Entry, Label, ListBox, StyleContext,
-    STYLE_PROVIDER_PRIORITY_APPLICATION,
+    Application, ApplicationWindow, Box as Box_, CssProvider, Entry, Label, ListBox, Orientation,
+    StyleContext, STYLE_PROVIDER_PRIORITY_APPLICATION,
 };
 
 use std::cell::RefCell;
@@ -117,7 +116,10 @@ fn build_ui(app: &Application) {
             // TODO: handle empty `input_text`.
             let command = format!("xdotool getwindowname {}", window_id);
             let window_name_output = run_command(&command);
-            let window_name = String::from_utf8_lossy(&window_name_output.stdout).to_string();
+            let window_name = String::from_utf8_lossy(&window_name_output.stdout)
+                .trim()
+                .to_string();
+
             let label = Label::new(Some(&window_name));
             // let list_box_row = ListBoxRow::new();
 
