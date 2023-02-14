@@ -53,41 +53,18 @@ fn print_output(name: &str, output: &Output) {
 }
 
 fn build_ui(app: &Application) {
-    // let vbox = gtk::Box::new(gtk::Orientation::Vertical, 12);
+    let vbox = Box_::new(Orientation::Vertical, 0);
+    let entry = Entry::new();
+
+    vbox.append(&entry);
+
+    let list_box = ListBox::new();
+
+    vbox.append(&list_box);
 
     let window = ApplicationWindow::new(app);
 
     window.set_title(Some("CSS"));
-
-    let vbox = Box_::new(Orientation::Vertical, 0);
-
-    //TODO: rename to entry
-    let entry = Entry::new();
-
-    // let input = gtk::Entry::builder()
-    //     .placeholder_text("input")
-    //     .margin_top(12)
-    //     .margin_bottom(12)
-    //     .margin_start(12)
-    //     .margin_end(12)
-    //     .build();
-
-    let list_box = ListBox::new();
-
-    // vbox.pack_start(&input, false, false, 0);
-    // vbox.pack_start(&list_box, true, true, 0);
-
-    // let window = ApplicationWindow::builder()
-    //     .application(app)
-    //     .title("gtk-app")
-    // .child(&vbox)
-    // .child(&input)
-    // .child(&list_box)
-    // .build();
-
-    vbox.append(&entry);
-    vbox.append(&list_box);
-
     window.set_child(Some(&vbox));
 
     app.connect_activate(clone!(@weak window => move |_| {
@@ -116,19 +93,15 @@ fn build_ui(app: &Application) {
             // TODO: handle empty `input_text`.
             let command = format!("xdotool getwindowname {}", window_id);
             let window_name_output = run_command(&command);
+
             let window_name = String::from_utf8_lossy(&window_name_output.stdout)
                 .trim()
                 .to_string();
 
             let label = Label::new(Some(&window_name));
-            // let list_box_row = ListBoxRow::new();
 
-            // list_box_row.append(&label);
             list_box.append(&label);
         }
-
-        // This is necessary because here `list_box_row` has been added dynamically.
-        list_box.show();
     });
 
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
