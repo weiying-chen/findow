@@ -1,5 +1,13 @@
+use glib::clone;
+use gtk::gdk::Display;
+use gtk::glib;
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Box, Label, ListBox, ListBoxRow};
+
+use gtk::{
+    Application, ApplicationWindow, CssProvider, Label, ListBox, StyleContext,
+    STYLE_PROVIDER_PRIORITY_APPLICATION,
+};
+
 use std::cell::RefCell;
 use std::process::{Command, Output};
 use std::rc::Rc;
@@ -9,7 +17,21 @@ const APP_ID: &str = "com.weiyingchen.ui-demo";
 fn main() {
     let app = Application::builder().application_id(APP_ID).build();
 
-    app.connect_activate(build_ui);
+    app.connect_startup(|app| {
+        let provider = CssProvider::new();
+
+        provider.load_from_data(include_str!("style.css"));
+
+        StyleContext::add_provider_for_display(
+            &Display::default().expect("Could not connect to a display."),
+            &provider,
+            STYLE_PROVIDER_PRIORITY_APPLICATION,
+        );
+
+        build_ui(app);
+    });
+
+    // app.connect_activate(build_ui);
     app.run();
 }
 
@@ -30,7 +52,7 @@ fn print_output(name: &str, output: &Output) {
 }
 
 fn build_ui(app: &Application) {
-    let vbox = Box::new(gtk::Orientation::Vertical, 10);
+    // let vbox = gtk::Box::new(gtk::Orientation::Vertical, 12);
 
     let input = gtk::Entry::builder()
         .placeholder_text("input")
@@ -42,16 +64,20 @@ fn build_ui(app: &Application) {
 
     let list_box = ListBox::new();
 
-    vbox.pack_start(&input, false, false, 0);
-    vbox.pack_start(&list_box, true, true, 0);
+    // vbox.pack_start(&input, false, false, 0);
+    // vbox.pack_start(&list_box, true, true, 0);
 
     let window = ApplicationWindow::builder()
         .application(app)
         .title("gtk-app")
-        .child(&vbox)
+        // .child(&vbox)
+        .child(&input)
+        .child(&list_box)
         .build();
 
-    window.show_all();
+    app.connect_activate(clone!(@weak window => move |_| {
+        window.show();
+    }));
 
     let window_id_output_rc = Rc::new(RefCell::new(String::new()));
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
@@ -67,8 +93,8 @@ fn build_ui(app: &Application) {
 
         *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
 
-        for row in list_box.children() {
-            list_box.remove(&row)
+        while let Some(row) = list_box.last_child() {
+            list_box.remove(&row);
         }
 
         for window_id in window_id_output_string.split("\n") {
@@ -77,19 +103,19 @@ fn build_ui(app: &Application) {
             let window_name_output = run_command(&command);
             let window_name = String::from_utf8_lossy(&window_name_output.stdout).to_string();
             let label = Label::new(Some(&window_name));
-            let list_box_row = ListBoxRow::new();
+            // let list_box_row = ListBoxRow::new();
 
-            list_box_row.add(&label);
-            list_box.add(&list_box_row);
+            // list_box_row.append(&label);
+            list_box.append(&label);
         }
 
         // This is necessary because here `list_box_row` has been added dynamically.
-        list_box.show_all();
+        list_box.show();
     });
 
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
 
-    input.connect_activate(move |_| {
+    input.connect_activate(clone!(@weak window => move |_| {
         let window_id_output_string = window_id_output_clone.borrow();
         let command = format!("xdotool windowactivate {}", window_id_output_string);
         let window_activate_output = run_command(&command);
@@ -97,5 +123,5 @@ fn build_ui(app: &Application) {
         print_output("window_activate_output", &window_activate_output);
         window.hide();
         window.close();
-    });
+    }));
 }
