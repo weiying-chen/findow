@@ -2,9 +2,10 @@ use glib::clone;
 use gtk::gdk::Display;
 use gtk::glib;
 use gtk::prelude::*;
+use gtk::Orientation;
 
 use gtk::{
-    Application, ApplicationWindow, CssProvider, Label, ListBox, StyleContext,
+    Application, ApplicationWindow, Box as Box_, CssProvider, Entry, Label, ListBox, StyleContext,
     STYLE_PROVIDER_PRIORITY_APPLICATION,
 };
 
@@ -12,10 +13,11 @@ use std::cell::RefCell;
 use std::process::{Command, Output};
 use std::rc::Rc;
 
-const APP_ID: &str = "com.weiyingchen.ui-demo";
+// const APP_ID: &str = "com.weiyingchen.ui-demo";
 
 fn main() {
-    let app = Application::builder().application_id(APP_ID).build();
+    // let app = Application::builder().application_id(APP_ID).build();
+    let app = Application::new(Some("com.github.css"), Default::default());
 
     app.connect_startup(|app| {
         let provider = CssProvider::new();
@@ -54,26 +56,40 @@ fn print_output(name: &str, output: &Output) {
 fn build_ui(app: &Application) {
     // let vbox = gtk::Box::new(gtk::Orientation::Vertical, 12);
 
-    let input = gtk::Entry::builder()
-        .placeholder_text("input")
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .build();
+    let window = ApplicationWindow::new(app);
+
+    window.set_title(Some("CSS"));
+
+    let vbox = Box_::new(Orientation::Vertical, 0);
+
+    //TODO: rename to entry
+    let input = Entry::new();
+
+    // let input = gtk::Entry::builder()
+    //     .placeholder_text("input")
+    //     .margin_top(12)
+    //     .margin_bottom(12)
+    //     .margin_start(12)
+    //     .margin_end(12)
+    //     .build();
 
     let list_box = ListBox::new();
 
     // vbox.pack_start(&input, false, false, 0);
     // vbox.pack_start(&list_box, true, true, 0);
 
-    let window = ApplicationWindow::builder()
-        .application(app)
-        .title("gtk-app")
-        // .child(&vbox)
-        .child(&input)
-        .child(&list_box)
-        .build();
+    // let window = ApplicationWindow::builder()
+    //     .application(app)
+    //     .title("gtk-app")
+    // .child(&vbox)
+    // .child(&input)
+    // .child(&list_box)
+    // .build();
+
+    vbox.append(&input);
+    vbox.append(&list_box);
+
+    window.set_child(Some(&vbox));
 
     app.connect_activate(clone!(@weak window => move |_| {
         window.show();
