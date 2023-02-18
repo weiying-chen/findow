@@ -12,10 +12,8 @@ use std::cell::RefCell;
 use std::process::{Command, Output};
 use std::rc::Rc;
 
-// const APP_ID: &str = "com.weiyingchen.ui-demo";
-
 fn main() {
-    let app = Application::new(Some("com.github.css"), Default::default());
+    let app = Application::new(Some("com.weiyingchen.ui-demo"), Default::default());
 
     app.connect_startup(|app| {
         let provider = CssProvider::new();
@@ -50,6 +48,25 @@ fn print_output(name: &str, output: &Output) {
     }
 }
 
+fn populate_list_box(window_id_output_string: &str, list_box: &ListBox) {
+    for window_id in window_id_output_string
+        .split("\n")
+        .filter(|s| !s.is_empty())
+    {
+        let command = format!("xdotool getwindowname {}", window_id);
+        let window_name_output = run_command(&command);
+
+        let window_name = String::from_utf8_lossy(&window_name_output.stdout)
+            .trim()
+            .to_string();
+
+        if !window_name.is_empty() {
+            let label = Label::new(Some(&window_name));
+            list_box.append(&label);
+        }
+    }
+}
+
 fn build_ui(app: &Application) {
     let vbox = Box_::new(Orientation::Vertical, 0);
     let entry = Entry::new();
@@ -59,6 +76,17 @@ fn build_ui(app: &Application) {
     let list_box = ListBox::new();
 
     vbox.append(&list_box);
+
+    // Search for all the visible windows.
+    let input_text = "\"\"";
+    let command = format!("xdotool search --onlyvisible --name {}", input_text);
+    let window_id_output = run_command(&command);
+
+    let window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
+
+    populate_list_box(&window_id_output_string, &list_box);
+
+    print_output("window_id_output", &window_id_output);
 
     let window = ApplicationWindow::new(app);
 
@@ -79,30 +107,17 @@ fn build_ui(app: &Application) {
 
         print_output("window_id_output", &window_id_output);
 
-        let mut window_id_output_string = window_id_output_clone.borrow_mut();
-
-        *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
-
         while let Some(row) = list_box.last_child() {
             list_box.remove(&row);
         }
 
-        for window_id in window_id_output_string
-            .split("\n")
-            .filter(|s| !s.is_empty())
-        {
-            // TODO: handle empty `input_text`.
-            let command = format!("xdotool getwindowname {}", window_id);
-            let window_name_output = run_command(&command);
+        let mut window_id_output_string = window_id_output_clone.borrow_mut();
 
-            let window_name = String::from_utf8_lossy(&window_name_output.stdout)
-                .trim()
-                .to_string();
+        *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
 
-            let label = Label::new(Some(&window_name));
+        println!("window_id_output_string: {}", window_id_output_string);
 
-            list_box.append(&label);
-        }
+        populate_list_box(&window_id_output_string, &list_box);
     });
 
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
