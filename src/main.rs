@@ -15,7 +15,7 @@ use std::rc::Rc;
 fn main() {
     let app = Application::new(Some("com.weiyingchen.ui-demo"), Default::default());
 
-    app.connect_startup(|app| {
+    app.connect_startup(|_| {
         let provider = CssProvider::new();
 
         provider.load_from_data(include_str!("style.css"));
@@ -25,10 +25,9 @@ fn main() {
             &provider,
             STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
-
-        build_ui(app);
     });
 
+    app.connect_activate(build_ui);
     app.run();
 }
 
@@ -91,10 +90,7 @@ fn build_ui(app: &Application) {
 
     window.set_title(Some("CSS"));
     window.set_child(Some(&vbox));
-
-    app.connect_activate(clone!(@weak window => move |_| {
-        window.show();
-    }));
+    window.show();
 
     let window_id_output_rc = Rc::new(RefCell::new(String::new()));
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
@@ -123,9 +119,9 @@ fn build_ui(app: &Application) {
     entry.connect_activate(clone!(@weak window => move |_| {
         let window_id_output_string = window_id_output_clone.borrow();
         let command = format!("xdotool windowactivate {}", window_id_output_string);
-        let window_activate_output = run_command(&command);
 
-        print_output("window_activate_output", &window_activate_output);
+        run_command(&command);
+
         window.hide();
         window.close();
     }));
