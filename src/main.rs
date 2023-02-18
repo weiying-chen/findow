@@ -81,10 +81,10 @@ fn build_ui(app: &Application) {
     vbox.append(&list_box);
 
     let input_text = "\"\"";
-    let window_id_output_string = get_window_ids(&input_text);
+    let window_ids = get_window_ids(&input_text);
 
-    println!("window_id_output: {}", window_id_output_string);
-    populate_list_box(&window_id_output_string, &list_box);
+    println!("window_id_output: {}", window_ids);
+    populate_list_box(&window_ids, &list_box);
 
     let window = ApplicationWindow::new(app);
 
@@ -92,33 +92,33 @@ fn build_ui(app: &Application) {
     window.set_child(Some(&vbox));
     window.show();
 
-    let window_id_output_rc = Rc::new(RefCell::new(String::new()));
-    let window_id_output_clone = Rc::clone(&window_id_output_rc);
+    let window_ids_rc = Rc::new(RefCell::new(String::new()));
+    let window_ids_clone = Rc::clone(&window_ids_rc);
 
     entry.connect_changed(move |entry| {
         clear_list_box(&list_box);
 
         let input_text = entry.text();
-        let mut window_id_output_string = window_id_output_clone.borrow_mut();
+        let mut window_ids = window_ids_clone.borrow_mut();
 
-        *window_id_output_string = get_window_ids(&input_text);
+        *window_ids = get_window_ids(&input_text);
 
-        println!("window_id_output_string: {}", window_id_output_string);
+        println!("window_id_output_string: {}", window_ids);
 
-        if window_id_output_string.is_empty() {
+        if window_ids.is_empty() {
             let input_text = "\"\"";
 
-            *window_id_output_string = get_window_ids(&input_text)
+            *window_ids = get_window_ids(&input_text)
         }
 
-        populate_list_box(&window_id_output_string, &list_box);
+        populate_list_box(&window_ids, &list_box);
     });
 
-    let window_id_output_clone = Rc::clone(&window_id_output_rc);
+    let window_ids_clone = Rc::clone(&window_ids_rc);
 
     entry.connect_activate(clone!(@weak window => move |_| {
-        let window_id_output_string = window_id_output_clone.borrow();
-        let command = format!("xdotool windowactivate {}", window_id_output_string);
+        let window_ids = window_ids_clone.borrow();
+        let command = format!("xdotool windowactivate {}", window_ids);
 
         run_command(&command);
 
