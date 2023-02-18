@@ -67,6 +67,12 @@ fn populate_list_box(window_id_output_string: &str, list_box: &ListBox) {
     }
 }
 
+fn get_window_ids(input_text: &str) -> String {
+    let command = format!("xdotool search --onlyvisible --name {}", input_text);
+    let output = run_command(&command);
+    String::from_utf8_lossy(&output.stdout).trim().to_string()
+}
+
 fn clear_list_box(list_box: &ListBox) {
     while let Some(row) = list_box.last_child() {
         list_box.remove(&row);
@@ -84,11 +90,12 @@ fn build_ui(app: &Application) {
     vbox.append(&list_box);
 
     let input_text = "\"\"";
-    let command = format!("xdotool search --onlyvisible --name {}", input_text);
-    let window_id_output = run_command(&command);
-    let window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
+    // let command = format!("xdotool search --onlyvisible --name {}", input_text);
+    // let window_id_output = run_command(&command);
+    let window_id_output_string = get_window_ids(&input_text);
 
-    print_output("window_id_output", &window_id_output);
+    // print_output("window_id_output: {}", &window_id_output);
+    println!("window_id_output: {}", window_id_output_string);
     populate_list_box(&window_id_output_string, &list_box);
 
     let window = ApplicationWindow::new(app);
@@ -104,26 +111,19 @@ fn build_ui(app: &Application) {
     let window_id_output_clone = Rc::clone(&window_id_output_rc);
 
     entry.connect_changed(move |entry| {
-        let input_text = entry.text();
-        let command = format!("xdotool search --onlyvisible --name {}", input_text);
-        let window_id_output = run_command(&command);
-
-        print_output("window_id_output", &window_id_output);
         clear_list_box(&list_box);
 
+        let input_text = entry.text();
         let mut window_id_output_string = window_id_output_clone.borrow_mut();
 
-        *window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
+        *window_id_output_string = get_window_ids(&input_text);
 
         println!("window_id_output_string: {}", window_id_output_string);
 
         if window_id_output_string.is_empty() {
             let input_text = "\"\"";
-            let command = format!("xdotool search --onlyvisible --name {}", input_text);
-            let window_id_output = run_command(&command);
 
-            *window_id_output_string =
-                String::from_utf8_lossy(&window_id_output.stdout).to_string();
+            *window_id_output_string = get_window_ids(&input_text)
         }
 
         populate_list_box(&window_id_output_string, &list_box);
