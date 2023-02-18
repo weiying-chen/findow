@@ -67,6 +67,18 @@ fn populate_list_box(window_id_output_string: &str, list_box: &ListBox) {
     }
 }
 
+fn get_window_id_all() -> Output {
+    let input_text = "\"\"";
+    let command = format!("xdotool search --onlyvisible --name {}", input_text);
+    run_command(&command)
+}
+
+fn clear_list_box(list_box: &ListBox) {
+    while let Some(row) = list_box.last_child() {
+        list_box.remove(&row);
+    }
+}
+
 fn build_ui(app: &Application) {
     let vbox = Box_::new(Orientation::Vertical, 0);
     let entry = Entry::new();
@@ -77,16 +89,12 @@ fn build_ui(app: &Application) {
 
     vbox.append(&list_box);
 
-    // Search for all the visible windows.
-    let input_text = "\"\"";
-    let command = format!("xdotool search --onlyvisible --name {}", input_text);
-    let window_id_output = run_command(&command);
-
+    let window_id_output = get_window_id_all();
     let window_id_output_string = String::from_utf8_lossy(&window_id_output.stdout).to_string();
 
-    populate_list_box(&window_id_output_string, &list_box);
-
     print_output("window_id_output", &window_id_output);
+
+    populate_list_box(&window_id_output_string, &list_box);
 
     let window = ApplicationWindow::new(app);
 
@@ -107,9 +115,7 @@ fn build_ui(app: &Application) {
 
         print_output("window_id_output", &window_id_output);
 
-        while let Some(row) = list_box.last_child() {
-            list_box.remove(&row);
-        }
+        clear_list_box(&list_box);
 
         let mut window_id_output_string = window_id_output_clone.borrow_mut();
 
@@ -118,9 +124,7 @@ fn build_ui(app: &Application) {
         println!("window_id_output_string: {}", window_id_output_string);
 
         if window_id_output_string.is_empty() {
-            let input_text = "\"\"";
-            let command = format!("xdotool search --onlyvisible --name {}", input_text);
-            let window_id_output = run_command(&command);
+            let window_id_output = get_window_id_all();
 
             *window_id_output_string =
                 String::from_utf8_lossy(&window_id_output.stdout).to_string();
