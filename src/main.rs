@@ -39,15 +39,12 @@ fn run_command(command: &str) -> Output {
         .unwrap_or_else(|_| panic!("failed to execute {}'", command))
 }
 
-fn populate_list_box(window_id_output_string: &str, list_box: &ListBox) {
-    for window_id in window_id_output_string
-        .split("\n")
-        .filter(|s| !s.is_empty())
-    {
+fn populate_list_box(window_ids: &str, list_box: &ListBox) {
+    for window_id in window_ids.split("\n").filter(|s| !s.is_empty()) {
         let command = format!("xdotool getwindowname {}", window_id);
-        let window_name_output = run_command(&command);
+        let window_name = run_command(&command);
 
-        let window_name = String::from_utf8_lossy(&window_name_output.stdout)
+        let window_name = String::from_utf8_lossy(&window_name.stdout)
             .trim()
             .to_string();
 
