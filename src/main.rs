@@ -40,14 +40,6 @@ fn run_command(command: &str) -> Output {
         .unwrap_or_else(|_| panic!("failed to execute {}'", command))
 }
 
-fn print_output(name: &str, output: &Output) {
-    if output.status.success() {
-        println!("{} (success): {:#?}", name, output);
-    } else {
-        println!("{} (failure): {:#?}", name, output);
-    }
-}
-
 fn populate_list_box(window_id_output_string: &str, list_box: &ListBox) {
     for window_id in window_id_output_string
         .split("\n")
@@ -90,11 +82,8 @@ fn build_ui(app: &Application) {
     vbox.append(&list_box);
 
     let input_text = "\"\"";
-    // let command = format!("xdotool search --onlyvisible --name {}", input_text);
-    // let window_id_output = run_command(&command);
     let window_id_output_string = get_window_ids(&input_text);
 
-    // print_output("window_id_output: {}", &window_id_output);
     println!("window_id_output: {}", window_id_output_string);
     populate_list_box(&window_id_output_string, &list_box);
 
