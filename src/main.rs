@@ -117,6 +117,15 @@ fn build_ui(app: &Application) {
 
         println!("window_id_output_string: {}", window_id_output_string);
 
+        if window_id_output_string.is_empty() {
+            let input_text = "\"\"";
+            let command = format!("xdotool search --onlyvisible --name {}", input_text);
+            let window_id_output = run_command(&command);
+
+            *window_id_output_string =
+                String::from_utf8_lossy(&window_id_output.stdout).to_string();
+        }
+
         populate_list_box(&window_id_output_string, &list_box);
     });
 
