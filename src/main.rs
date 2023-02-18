@@ -83,7 +83,6 @@ fn build_ui(app: &Application) {
     let input_text = "\"\"";
     let window_ids = get_window_ids(&input_text);
 
-    println!("window_id_output: {}", window_ids);
     populate_list_box(&window_ids, &list_box);
 
     let window = ApplicationWindow::new(app);
@@ -102,8 +101,6 @@ fn build_ui(app: &Application) {
         let mut window_ids = window_ids_clone.borrow_mut();
 
         *window_ids = get_window_ids(&input_text);
-
-        println!("window_id_output_string: {}", window_ids);
 
         if window_ids.is_empty() {
             let input_text = "\"\"";
