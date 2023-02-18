@@ -55,8 +55,8 @@ fn populate_list_box(window_ids: &str, list_box: &ListBox) {
     }
 }
 
-fn get_window_ids(window_names: &str) -> String {
-    let command = format!("xdotool search --onlyvisible --name {}", window_names);
+fn get_window_ids(text: &str) -> String {
+    let command = format!("xdotool search --onlyvisible --name {}", text);
     let output = run_command(&command);
     String::from_utf8_lossy(&output.stdout).trim().to_string()
 }
@@ -77,8 +77,8 @@ fn build_ui(app: &Application) {
 
     vbox.append(&list_box);
 
-    let window_names = "\"\"";
-    let window_ids = get_window_ids(&window_names);
+    let text = "\"\"";
+    let window_ids = get_window_ids(&text);
 
     populate_list_box(&window_ids, &list_box);
 
@@ -94,15 +94,15 @@ fn build_ui(app: &Application) {
     entry.connect_changed(move |entry| {
         clear_list_box(&list_box);
 
-        let window_names = entry.text();
+        let text = entry.text();
         let mut window_ids = window_ids_clone.borrow_mut();
 
-        *window_ids = get_window_ids(&window_names);
+        *window_ids = get_window_ids(&text);
 
         if window_ids.is_empty() {
-            let window_names = "\"\"";
+            let text = "\"\"";
 
-            *window_ids = get_window_ids(&window_names)
+            *window_ids = get_window_ids(&text)
         }
 
         populate_list_box(&window_ids, &list_box);
