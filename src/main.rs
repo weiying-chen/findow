@@ -86,6 +86,17 @@ fn build_ui(app: &Application) {
 
     window.set_title(Some("CSS"));
     window.set_child(Some(&vbox));
+
+    window.connect_show(clone!(@weak window => move |_| {
+        // This is necessary for the command to run.
+        glib::idle_add(|| {
+            let command = "wmctrl -r \"CSS\" -e 1,640,100,680,768";
+
+            run_command(command);
+            glib::Continue(false)
+        });
+    }));
+
     window.show();
 
     let window_ids_rc = Rc::new(RefCell::new(String::new()));
