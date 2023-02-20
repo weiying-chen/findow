@@ -12,8 +12,10 @@ use std::cell::RefCell;
 use std::process::{Command, Output};
 use std::rc::Rc;
 
+const APP_ID: &str = "com.weiyingchen.ui-demo";
+
 fn main() {
-    let app = Application::new(Some("com.weiyingchen.ui-demo"), Default::default());
+    let app = Application::new(Some(APP_ID), Default::default());
 
     app.connect_startup(|_| {
         let provider = CssProvider::new();
@@ -42,11 +44,9 @@ fn run_command(command: &str) -> Output {
 fn populate_list_box(window_ids: &str, list_box: &ListBox) {
     for window_id in window_ids.split("\n").filter(|s| !s.is_empty()) {
         let command = format!("xdotool getwindowname {}", window_id);
-        let window_name = run_command(&command);
+        let output = run_command(&command);
 
-        let window_name = String::from_utf8_lossy(&window_name.stdout)
-            .trim()
-            .to_string();
+        let window_name = String::from_utf8_lossy(&output.stdout).trim().to_string();
 
         if !window_name.is_empty() {
             let label = Label::new(Some(&window_name));
@@ -84,18 +84,22 @@ fn build_ui(app: &Application) {
 
     let window = ApplicationWindow::new(app);
 
-    window.set_title(Some("CSS"));
+    const WINDOW_TITLE = "CSS";
+
+    window.set_title(Some(WINDOW_TITLE));
     window.set_child(Some(&vbox));
 
     window.connect_show(clone!(@weak window => move |_| {
         // This is necessary for the command to run.
         glib::idle_add(|| {
-            let command = "xdotool search --name \"CSS\"";
-            let window_xid = run_command(command);
+            let command = format!("xdotool search --name {}", WINDOW_TITLE);
+            let output = run_command(&command);
 
-            println!("{:#?}", window_xid);
+            let window_xid = String::from_utf8_lossy(&output.stdout)
+                .trim()
+                .to_string();
 
-            let command = format!("xdotool windowmove {} 780 400", String::from_utf8_lossy(&window_xid.stdout).trim().to_string());
+            let command = format!("xdotool windowmove {} 780 400", window_xid);
 
             run_command(&command);
             glib::Continue(false)
