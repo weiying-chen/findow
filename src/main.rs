@@ -90,9 +90,14 @@ fn build_ui(app: &Application) {
     window.connect_show(clone!(@weak window => move |_| {
         // This is necessary for the command to run.
         glib::idle_add(|| {
-            let command = "wmctrl -r \"CSS\" -e 1,640,100,680,768";
+            let command = "xdotool search --name \"CSS\"";
+            let window_xid = run_command(command);
 
-            run_command(command);
+            println!("{:#?}", window_xid);
+
+            let command = format!("xdotool windowmove {} 780 400", String::from_utf8_lossy(&window_xid.stdout).trim().to_string());
+
+            run_command(&command);
             glib::Continue(false)
         });
     }));
