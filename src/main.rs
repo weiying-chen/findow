@@ -84,7 +84,7 @@ fn build_ui(app: &Application) {
 
     let window = ApplicationWindow::new(app);
 
-    const WINDOW_TITLE = "CSS";
+    const WINDOW_TITLE: &str = "CSS";
 
     window.set_title(Some(WINDOW_TITLE));
     window.set_child(Some(&vbox));
