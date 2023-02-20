@@ -95,11 +95,11 @@ fn build_ui(app: &Application) {
             let command = format!("xdotool search --name {}", WINDOW_TITLE);
             let output = run_command(&command);
 
-            let window_xid = String::from_utf8_lossy(&output.stdout)
+            let window_id = String::from_utf8_lossy(&output.stdout)
                 .trim()
                 .to_string();
 
-            let command = format!("xdotool windowmove {} 780 400", window_xid);
+            let command = format!("xdotool windowmove {} 780 400", window_id);
 
             run_command(&command);
             glib::Continue(false)
