@@ -92,9 +92,8 @@ fn build_ui(app: &Application) {
         glib::idle_add(|| {
             let window_id = xdotool::search(WINDOW_NAME, "--name");
 
-            let command = format!("xdotool windowmove {} 780 400", window_id.join(", "));
+            xdotool::center_window(&window_id.join(", "));
 
-            xdotool::run_command(&command);
             glib::Continue(false)
         });
     }));
@@ -115,8 +114,10 @@ fn build_ui(app: &Application) {
         if window_ids.is_empty() {
             let text = "\"\"";
 
-            *window_ids = xdotool::search(&text, "---name")
+            // TODO: Fix this
+            *window_ids = xdotool::search(&text, "---name");
         }
+
         populate_list_box(&window_ids, &list_box);
     });
 
@@ -124,10 +125,9 @@ fn build_ui(app: &Application) {
 
     entry.connect_activate(clone!(@weak window => move |_| {
         let window_ids = window_ids_clone.borrow();
-        let command = format!("xdotool windowactivate {}", window_ids.join(", "));
 
-        xdotool::run_command(&command);
-
+        // If there are more than one window, the first one that matches will be activated.
+        xdotool::activate_window(&window_ids.join(", "));
         window.hide();
         window.close();
     }));
