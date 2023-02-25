@@ -14,30 +14,37 @@ pub fn search(query: &str, flag: &str) -> Vec<String> {
     match output {
         Ok(o) => {
             if o.status.success() {
-                println!("Success message: {:#?}", o.stdout);
+                println!("Success message: {}", String::from_utf8_lossy(&o.stdout));
                 String::from_utf8_lossy(&o.stdout)
                     .lines()
                     .map(|s| s.to_owned())
                     .collect()
             } else {
-                eprintln!("Error message: {:#?}", String::from_utf8_lossy(&o.stderr));
+                eprintln!("Error message: {}", String::from_utf8_lossy(&o.stderr));
                 Vec::new()
             }
         }
+
         Err(err) => {
-            eprintln!("Error message: {:#?}", err);
+            eprintln!("Error message: {}", err);
             Vec::new()
         }
     }
 }
+
+// TODO: Should print o.stderr too?
 
 pub fn center_window(window_id: &str) {
     let command = format!("xdotool windowmove {} 780 400", window_id);
     let output = run_command(&command);
 
     match output {
-        Ok(o) => println!("Command executed successfully. Output: {:#?}", o),
-        Err(err) => eprintln!("Command execution failed with error: {:#?}", err),
+        // TODO: Change the name of o
+        Ok(o) => println!(
+            "Command executed successfully. Output: {}",
+            String::from_utf8_lossy(&o.stdout)
+        ),
+        Err(err) => eprintln!("Command execution failed with error: {}", err),
     }
 }
 
@@ -46,9 +53,10 @@ pub fn get_window_name(window_id: &str) -> String {
     let output = run_command(&command);
 
     match output {
+        // TODO: Change the name of o
         Ok(o) => String::from_utf8_lossy(&o.stdout).trim().to_string(),
         Err(err) => {
-            eprintln!("Error message: {:#?}", err.to_string());
+            eprintln!("Error message: {}", err.to_string());
             String::new()
         }
     }
@@ -59,7 +67,10 @@ pub fn activate_window(window_id: &str) {
     let output = run_command(&command);
 
     match output {
-        Ok(o) => println!("Command executed successfully. Output: {:#?}", o),
-        Err(err) => eprintln!("Command execution failed with error: {:#?}", err),
+        Ok(o) => println!(
+            "Command executed successfully. Output: {}",
+            String::from_utf8_lossy(&o.stdout)
+        ),
+        Err(err) => eprintln!("Command execution failed with error: {}", err),
     }
 }
