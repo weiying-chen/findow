@@ -77,7 +77,7 @@ fn build_ui(app: &Application) {
     vbox.append(&list_box);
 
     let text = "\"\"";
-    let window_ids = xdotool::search(&text, "--name");
+    let window_ids = xdotool::search("--name", &text);
 
     populate_list_box(&window_ids, &list_box);
 
@@ -93,14 +93,14 @@ fn build_ui(app: &Application) {
         // std::thread::sleep(std::time::Duration::from_secs(1)); // add a delay of 1 second
         // let window_id = xdotool::search(WINDOW_NAME, "--name");
 
-        let command = format!("xdotool search --onlyvisible --name {}", WINDOW_NAME);
+        // let command = format!("xdotool search --onlyvisible --name {}", WINDOW_NAME);
 
-        let window_id = Command::new("sh").arg("-c").arg(command).output();
+        // let window_id = Command::new("sh").arg("-c").arg(command).output();
 
 
         // let window_id = xdotool::search(WINDOW_NAME, "--name");
 
-        println!("window_id: {:?}", window_id);
+        // println!("window_id: {:?}", window_id);
         // xdotool::center_window(&window_id.join(", "));
     }));
 
@@ -115,13 +115,12 @@ fn build_ui(app: &Application) {
         let text = entry.text();
         let mut window_ids = window_ids_clone.borrow_mut();
 
-        *window_ids = xdotool::search(&text, "--name");
+        *window_ids = xdotool::search("--name", &text);
 
         if window_ids.is_empty() {
             let text = "\"\"";
 
-            // TODO: Fix this
-            *window_ids = xdotool::search(&text, "---name");
+            *window_ids = xdotool::search("--name", &text);
         }
 
         populate_list_box(&window_ids, &list_box);

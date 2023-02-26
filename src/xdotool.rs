@@ -47,7 +47,20 @@ pub fn run_command(command: &str) -> Result<Output, io::Error> {
     // Command::new("wrongcommand").arg("non-existent-file").output()
 }
 
-pub fn search(query: &str, flag: &str) -> Vec<String> {
+fn check_command_output(command: &str, output: Output) -> Result<Output, CommandError> {
+    if output.status.success() {
+        Ok(output)
+    } else {
+        Err(CommandError::NonZeroExit {
+            status: output.status,
+            command: command.to_owned(),
+            stderr: output.stderr,
+            stdout: output.stdout,
+        })
+    }
+}
+
+pub fn search(flag: &str, query: &str) -> Vec<String> {
     let command = format!("xdotool search --onlyvisible {} {}", flag, query);
 
     run_command(&command)
@@ -55,18 +68,7 @@ pub fn search(query: &str, flag: &str) -> Vec<String> {
             source: err,
             command: command.to_owned(),
         })
-        .and_then(|output| {
-            if output.status.success() {
-                Ok(output)
-            } else {
-                Err(CommandError::NonZeroExit {
-                    status: output.status,
-                    command: command.to_owned(),
-                    stderr: output.stderr,
-                    stdout: output.stdout,
-                })
-            }
-        })
+        .and_then(|output| check_command_output(&command, output))
         .map_or_else(
             |err| {
                 eprintln!("Error: {}", err);
