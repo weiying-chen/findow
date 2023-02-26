@@ -44,7 +44,7 @@ impl fmt::Display for CommandError {
 pub fn run_command(command: &str) -> Result<Output, io::Error> {
     Command::new("sh").arg("-c").arg(command).output()
 
-    // Command::new("ls").arg("non-existent-file").output()
+    // Command::new("wrongcommand").arg("non-existent-file").output()
 }
 
 pub fn search(query: &str, flag: &str) -> Vec<String> {
@@ -56,7 +56,6 @@ pub fn search(query: &str, flag: &str) -> Vec<String> {
             command: command.to_owned(),
         })
         .and_then(|output| {
-            // Handle our custom case where we want to treat non-zero as a failure
             if output.status.success() {
                 Ok(output)
             } else {
@@ -81,8 +80,6 @@ pub fn search(query: &str, flag: &str) -> Vec<String> {
         )
 }
 
-// TODO: Should print o.stderr too?
-
 pub fn center_window(window_id: &str) {
     let command = format!("xdotool windowmove {} 780 400", window_id);
     let output = run_command(&command);
@@ -90,7 +87,8 @@ pub fn center_window(window_id: &str) {
     match output {
         // TODO: Change the name of o
         Ok(o) => println!(
-            "Command executed successfully. Output: {:#?}",
+            "{} executed successfully. Output: {}",
+            command,
             String::from_utf8_lossy(&o.stdout)
         ),
         Err(err) => eprintln!("Command execution failed with error: {}", err),
