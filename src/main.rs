@@ -88,14 +88,12 @@ fn build_ui(app: &Application) {
     window.set_child(Some(&vbox));
 
     window.connect_show(clone!(@weak window => move |_| {
-        // This is necessary for the command to run.
-        glib::idle_add(|| {
-            let window_id = xdotool::search(WINDOW_NAME, "--name");
+        // TODO: Fix this ussing xb11rb
+        // std::thread::sleep(std::time::Duration::from_secs(1)); // add a delay of 1 second
+        // let window_id = xdotool::search(WINDOW_NAME, "--name");
 
-            xdotool::center_window(&window_id.join(", "));
-
-            glib::Continue(false)
-        });
+        // println!("window_id: {:?}", window_id);
+        // xdotool::center_window(&window_id.join(", "));
     }));
 
     window.show();

@@ -1,35 +1,84 @@
 use std::{
-    io,
+    fmt, io,
     process::{Command, Output},
 };
 
+#[derive(Debug)]
+enum CommandError {
+    CouldNotExecute {
+        command: String,
+        source: std::io::Error,
+    },
+
+    NonZeroExit {
+        command: String,
+        status: std::process::ExitStatus,
+        stderr: Vec<u8>,
+        stdout: Vec<u8>,
+    },
+}
+
+impl fmt::Display for CommandError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            CommandError::CouldNotExecute { source, command } => {
+                write!(f, "Could not execute command '{}': {}", command, source)
+            }
+            CommandError::NonZeroExit {
+                status,
+                command,
+                stderr,
+                stdout,
+            } => {
+                let stderr_str = String::from_utf8_lossy(stderr).trim().to_owned();
+                let stdout_str = String::from_utf8_lossy(stdout).trim().to_owned();
+                writeln!(f, "Command `{}` failed with status {}", command, status)?;
+                writeln!(f, "stderr: {}", stderr_str)?;
+                writeln!(f, "stdout: {}", stdout_str)?;
+                Ok(())
+            }
+        }
+    }
+}
+
 pub fn run_command(command: &str) -> Result<Output, io::Error> {
     Command::new("sh").arg("-c").arg(command).output()
+
+    // Command::new("ls").arg("non-existent-file").output()
 }
 
 pub fn search(query: &str, flag: &str) -> Vec<String> {
     let command = format!("xdotool search --onlyvisible {} {}", flag, query);
-    let output = run_command(&command);
 
-    match output {
-        Ok(o) => {
-            if o.status.success() {
-                println!("Success message: {}", String::from_utf8_lossy(&o.stdout));
-                String::from_utf8_lossy(&o.stdout)
-                    .lines()
-                    .map(|s| s.to_owned())
-                    .collect()
+    run_command(&command)
+        .map_err(|err| CommandError::CouldNotExecute {
+            source: err,
+            command: command.to_owned(),
+        })
+        .and_then(|output| {
+            // Handle our custom case where we want to treat non-zero as a failure
+            if output.status.success() {
+                Ok(output)
             } else {
-                eprintln!("Error message: {}", String::from_utf8_lossy(&o.stderr));
-                Vec::new()
+                Err(CommandError::NonZeroExit {
+                    status: output.status,
+                    command: command.to_owned(),
+                    stderr: output.stderr,
+                    stdout: output.stdout,
+                })
             }
-        }
+        })
+        .map_or_else(
+            |err| {
+                eprintln!("Error: {}", err);
+                Vec::new()
+            },
+            |output| {
+                let stdout = String::from_utf8_lossy(&output.stdout);
 
-        Err(err) => {
-            eprintln!("Error message: {}", err);
-            Vec::new()
-        }
-    }
+                stdout.lines().map(|s| s.to_owned()).collect()
+            },
+        )
 }
 
 // TODO: Should print o.stderr too?
@@ -41,7 +90,7 @@ pub fn center_window(window_id: &str) {
     match output {
         // TODO: Change the name of o
         Ok(o) => println!(
-            "Command executed successfully. Output: {}",
+            "Command executed successfully. Output: {:#?}",
             String::from_utf8_lossy(&o.stdout)
         ),
         Err(err) => eprintln!("Command execution failed with error: {}", err),
