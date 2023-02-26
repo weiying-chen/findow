@@ -10,12 +10,13 @@ use gtk::{
 };
 
 use std::cell::RefCell;
+use std::process::Command;
 // use std::process::{Command, Output};
 use std::rc::Rc;
 
 const APP_ID: &str = "com.weiyingchen.ui-demo";
 
-fn main() {
+fn main() -> glib::ExitCode {
     let app = Application::new(Some(APP_ID), Default::default());
 
     app.connect_startup(|_| {
@@ -31,7 +32,7 @@ fn main() {
     });
 
     app.connect_activate(build_ui);
-    app.run();
+    app.run()
 }
 
 // fn run_command(command: &str) -> Output {
@@ -87,12 +88,19 @@ fn build_ui(app: &Application) {
     window.set_title(Some(WINDOW_NAME));
     window.set_child(Some(&vbox));
 
-    window.connect_show(clone!(@weak window => move |_| {
+    window.connect_realize(clone!(@weak window => move |_| {
         // TODO: Fix this ussing xb11rb
         // std::thread::sleep(std::time::Duration::from_secs(1)); // add a delay of 1 second
         // let window_id = xdotool::search(WINDOW_NAME, "--name");
 
-        // println!("window_id: {:?}", window_id);
+        let command = format!("xdotool search --onlyvisible --name {}", WINDOW_NAME);
+
+        let window_id = Command::new("sh").arg("-c").arg(command).output();
+
+
+        // let window_id = xdotool::search(WINDOW_NAME, "--name");
+
+        println!("window_id: {:?}", window_id);
         // xdotool::center_window(&window_id.join(", "));
     }));
 
