@@ -6,12 +6,10 @@ use std::{
 #[derive(Debug)]
 enum CommandError {
     CouldNotExecute {
-        command: String,
         source: std::io::Error,
     },
 
     NonZeroExit {
-        command: String,
         status: std::process::ExitStatus,
         stderr: Vec<u8>,
         stdout: Vec<u8>,
@@ -21,18 +19,17 @@ enum CommandError {
 impl fmt::Display for CommandError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CommandError::CouldNotExecute { source, command } => {
-                write!(f, "Could not execute command '{}': {}", command, source)
+            CommandError::CouldNotExecute { source } => {
+                write!(f, "Source: {}", source)
             }
             CommandError::NonZeroExit {
                 status,
-                command,
                 stderr,
                 stdout,
             } => {
                 let stderr_str = String::from_utf8_lossy(stderr).trim().to_owned();
                 let stdout_str = String::from_utf8_lossy(stdout).trim().to_owned();
-                writeln!(f, "Command `{}` failed with status {}", command, status)?;
+                writeln!(f, "status: {}", status)?;
                 writeln!(f, "stderr: {}", stderr_str)?;
                 writeln!(f, "stdout: {}", stdout_str)?;
                 Ok(())
@@ -41,20 +38,16 @@ impl fmt::Display for CommandError {
     }
 }
 
-fn create_command_error(err: io::Error, command: &str) -> CommandError {
-    CommandError::CouldNotExecute {
-        source: err,
-        command: command.to_owned(),
-    }
+fn create_command_error(err: io::Error) -> CommandError {
+    CommandError::CouldNotExecute { source: err }
 }
 
-fn check_command_output(command: &str, output: Output) -> Result<Output, CommandError> {
+fn check_command_output(output: Output) -> Result<Output, CommandError> {
     if output.status.success() {
         Ok(output)
     } else {
         Err(CommandError::NonZeroExit {
             status: output.status,
-            command: command.to_owned(),
             stderr: output.stderr,
             stdout: output.stdout,
         })
@@ -66,8 +59,8 @@ fn run_command(command: &str) -> Result<Output, CommandError> {
         .arg("-c")
         .arg(command)
         .output()
-        .map_err(|err| create_command_error(err, command))
-        .and_then(|output| check_command_output(command, output))
+        .map_err(|err| create_command_error(err))
+        .and_then(|output| check_command_output(output))
 }
 
 pub fn search(flag: &str, query: &str) -> Vec<String> {
@@ -75,7 +68,8 @@ pub fn search(flag: &str, query: &str) -> Vec<String> {
 
     run_command(&command).map_or_else(
         |err| {
-            eprintln!("Error: {}", err);
+            eprintln!("Command: {}", command);
+            eprintln!("Error: \n{}", err);
             Vec::new()
         },
         |output| {
