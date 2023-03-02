@@ -10,7 +10,7 @@ use gtk::{
 };
 
 use std::cell::RefCell;
-use std::process::Command;
+// use std::process::Command;
 // use std::process::{Command, Output};
 use std::rc::Rc;
 

@@ -41,10 +41,11 @@ impl fmt::Display for CommandError {
     }
 }
 
-pub fn run_command(command: &str) -> Result<Output, io::Error> {
-    Command::new("sh").arg("-c").arg(command).output()
-
-    // Command::new("wrongcommand").arg("non-existent-file").output()
+fn create_command_error(err: io::Error, command: &str) -> CommandError {
+    CommandError::CouldNotExecute {
+        source: err,
+        command: command.to_owned(),
+    }
 }
 
 fn check_command_output(command: &str, output: Output) -> Result<Output, CommandError> {
@@ -60,26 +61,29 @@ fn check_command_output(command: &str, output: Output) -> Result<Output, Command
     }
 }
 
+fn run_command(command: &str) -> Result<Output, CommandError> {
+    Command::new("sh")
+        .arg("-c")
+        .arg(command)
+        .output()
+        .map_err(|err| create_command_error(err, command))
+        .and_then(|output| check_command_output(command, output))
+}
+
 pub fn search(flag: &str, query: &str) -> Vec<String> {
     let command = format!("xdotool search --onlyvisible {} {}", flag, query);
 
-    run_command(&command)
-        .map_err(|err| CommandError::CouldNotExecute {
-            source: err,
-            command: command.to_owned(),
-        })
-        .and_then(|output| check_command_output(&command, output))
-        .map_or_else(
-            |err| {
-                eprintln!("Error: {}", err);
-                Vec::new()
-            },
-            |output| {
-                let stdout = String::from_utf8_lossy(&output.stdout);
+    run_command(&command).map_or_else(
+        |err| {
+            eprintln!("Error: {}", err);
+            Vec::new()
+        },
+        |output| {
+            let stdout = String::from_utf8_lossy(&output.stdout);
 
-                stdout.lines().map(|s| s.to_owned()).collect()
-            },
-        )
+            stdout.lines().map(|s| s.to_owned()).collect()
+        },
+    )
 }
 
 pub fn center_window(window_id: &str) {
