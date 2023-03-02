@@ -63,8 +63,8 @@ fn run_command(command: &str) -> Result<Output, CommandError> {
         .and_then(|output| handle_output(output))
 }
 
-pub fn search_windows(flag: &str, query: &str) -> Vec<String> {
-    let command = format!("xdotool search --onlyvisible {} {}", flag, query);
+pub fn search_windows(options: &str, pattern: &str) -> Vec<String> {
+    let command = format!("xdotool search --onlyvisible {} {}", options, pattern);
 
     run_command(&command).map_or_else(
         |err| {
