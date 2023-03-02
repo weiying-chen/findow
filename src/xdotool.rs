@@ -82,42 +82,38 @@ pub fn search(flag: &str, query: &str) -> Vec<String> {
 
 pub fn center_window(window_id: &str) {
     let command = format!("xdotool windowmove {} 780 400", window_id);
-    let output = run_command(&command);
 
-    match output {
-        // TODO: Change the name of o
-        Ok(o) => println!(
-            "{} executed successfully. Output: {}",
-            command,
-            String::from_utf8_lossy(&o.stdout)
-        ),
-        Err(err) => eprintln!("Command execution failed with error: {}", err),
-    }
+    run_command(&command).map_or_else(
+        |err| {
+            eprintln!("Command: {}", command);
+            eprintln!("Error: \n{}", err);
+        },
+        |_| (),
+    )
 }
 
 pub fn get_window_name(window_id: &str) -> String {
     let command = format!("xdotool getwindowname {}", window_id);
-    let output = run_command(&command);
 
-    match output {
-        // TODO: Change the name of o
-        Ok(o) => String::from_utf8_lossy(&o.stdout).trim().to_string(),
-        Err(err) => {
-            eprintln!("Error message: {}", err.to_string());
+    run_command(&command).map_or_else(
+        |err| {
+            eprintln!("Command: {}", command);
+            eprintln!("Error: \n{}", err);
+
             String::new()
-        }
-    }
+        },
+        |output| String::from_utf8_lossy(&output.stdout).trim().to_owned(),
+    )
 }
 
 pub fn activate_window(window_id: &str) {
     let command = format!("xdotool windowactivate {}", window_id);
-    let output = run_command(&command);
 
-    match output {
-        Ok(o) => println!(
-            "Command executed successfully. Output: {}",
-            String::from_utf8_lossy(&o.stdout)
-        ),
-        Err(err) => eprintln!("Command execution failed with error: {}", err),
-    }
+    run_command(&command).map_or_else(
+        |err| {
+            eprintln!("Command: {}", command);
+            eprintln!("Error: \n{}", err);
+        },
+        |_| (),
+    )
 }
