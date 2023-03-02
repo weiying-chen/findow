@@ -77,7 +77,7 @@ fn build_ui(app: &Application) {
     vbox.append(&list_box);
 
     let text = "\"\"";
-    let window_ids = xdotool::search("--name", &text);
+    let window_ids = xdotool::search_windows("--name", &text);
 
     populate_list_box(&window_ids, &list_box);
 
@@ -115,12 +115,12 @@ fn build_ui(app: &Application) {
         let text = entry.text();
         let mut window_ids = window_ids_clone.borrow_mut();
 
-        *window_ids = xdotool::search("--name", &text);
+        *window_ids = xdotool::search_windows("--name", &text);
 
         if window_ids.is_empty() {
             let text = "\"\"";
 
-            *window_ids = xdotool::search("--name", &text);
+            *window_ids = xdotool::search_windows("--name", &text);
         }
 
         populate_list_box(&window_ids, &list_box);

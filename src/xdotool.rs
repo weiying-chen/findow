@@ -63,7 +63,7 @@ fn run_command(command: &str) -> Result<Output, CommandError> {
         .and_then(|output| handle_output(output))
 }
 
-pub fn search(flag: &str, query: &str) -> Vec<String> {
+pub fn search_windows(flag: &str, query: &str) -> Vec<String> {
     let command = format!("xdotool search --onlyvisible {} {}", flag, query);
 
     run_command(&command).map_or_else(
@@ -99,7 +99,6 @@ pub fn get_window_name(window_id: &str) -> String {
         |err| {
             eprintln!("Command: {}", command);
             eprintln!("Error: \n{}", err);
-
             String::new()
         },
         |output| String::from_utf8_lossy(&output.stdout).trim().to_owned(),
