@@ -5,7 +5,7 @@ use std::{
 
 #[derive(Debug)]
 enum CommandError {
-    CouldNotExecute {
+    ExecutionError {
         source: std::io::Error,
     },
 
@@ -19,7 +19,7 @@ enum CommandError {
 impl fmt::Display for CommandError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CommandError::CouldNotExecute { source } => {
+            CommandError::ExecutionError { source } => {
                 write!(f, "Source: {}", source)
             }
             CommandError::NonZeroExit {
@@ -38,11 +38,11 @@ impl fmt::Display for CommandError {
     }
 }
 
-fn create_command_error(err: io::Error) -> CommandError {
-    CommandError::CouldNotExecute { source: err }
+fn create_execution_error(err: io::Error) -> CommandError {
+    CommandError::ExecutionError { source: err }
 }
 
-fn check_command_output(output: Output) -> Result<Output, CommandError> {
+fn handle_output(output: Output) -> Result<Output, CommandError> {
     if output.status.success() {
         Ok(output)
     } else {
@@ -59,8 +59,8 @@ fn run_command(command: &str) -> Result<Output, CommandError> {
         .arg("-c")
         .arg(command)
         .output()
-        .map_err(|err| create_command_error(err))
-        .and_then(|output| check_command_output(output))
+        .map_err(|err| create_execution_error(err))
+        .and_then(|output| handle_output(output))
 }
 
 pub fn search(flag: &str, query: &str) -> Vec<String> {
