@@ -133,7 +133,9 @@ fn build_ui(app: &Application) {
 
         // If there are more than one window, the first one that matches will be activated.
         xdotool::activate_window(&window_ids.join(", "));
-        window.hide();
-        window.close();
+        // window.hide();
+        // window.close();
+
+        window.minimize();
     }));
 }
