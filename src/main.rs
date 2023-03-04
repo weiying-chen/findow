@@ -10,8 +10,6 @@ use gtk::{
 };
 
 use std::cell::RefCell;
-// use std::process::Command;
-// use std::process::{Command, Output};
 use std::rc::Rc;
 
 const APP_ID: &str = "com.weiyingchen.ui-demo";
@@ -35,14 +33,6 @@ fn main() -> glib::ExitCode {
     app.run()
 }
 
-// fn run_command(command: &str) -> Output {
-//     Command::new("sh")
-//         .arg("-c")
-//         .arg(command)
-//         .output()
-//         .unwrap_or_else(|_| panic!("failed to execute {}'", command))
-// }
-
 fn populate_list_box(window_ids: &Vec<String>, list_box: &ListBox) {
     for window_id in window_ids.iter().filter(|s| !s.is_empty()) {
         let window_name = xdotool::get_window_name(window_id);
@@ -53,12 +43,6 @@ fn populate_list_box(window_ids: &Vec<String>, list_box: &ListBox) {
         }
     }
 }
-
-// fn search_windows(text: &str) -> String {
-//     let command = format!("xdotool search --onlyvisible --name {}", text);
-//     let output = run_command(&command);
-//     String::from_utf8_lossy(&output.stdout).trim().to_string()
-// }
 
 fn clear_list_box(list_box: &ListBox) {
     while let Some(row) = list_box.last_child() {
@@ -109,7 +93,7 @@ fn build_ui(app: &Application) {
     let window_ids_rc = Rc::new(RefCell::new(Vec::new()));
     let window_ids_clone = Rc::clone(&window_ids_rc);
 
-    entry.connect_changed(move |entry| {
+    entry.connect_changed(clone!(@weak entry, @weak list_box => move |_| {
         clear_list_box(&list_box);
 
         let pattern = entry.text();
@@ -124,18 +108,27 @@ fn build_ui(app: &Application) {
         }
 
         populate_list_box(&window_ids, &list_box);
-    });
+    }));
 
     let window_ids_clone = Rc::clone(&window_ids_rc);
 
-    entry.connect_activate(clone!(@weak window => move |_| {
-        let window_ids = window_ids_clone.borrow();
+    entry.connect_activate(
+        clone!(@weak entry, @weak window, @weak list_box => move |_| {
+            let mut window_ids = window_ids_clone.borrow_mut();
 
-        // If there are more than one window, the first one that matches will be activated.
-        xdotool::activate_window(&window_ids.join(", "));
-        // window.hide();
-        // window.close();
+            // If there are more than one window, the first one that matches will be activated.
+            xdotool::activate_window(&window_ids.join(", "));
+            clear_list_box(&list_box);
 
-        window.minimize();
-    }));
+            let pattern = "\"\"";
+
+            *window_ids = xdotool::search_windows("--name", &pattern);
+            populate_list_box(&window_ids, &list_box);
+
+            // Without this, `entry.set_text("")` will cause a double-mutable reference error.
+            drop(window_ids);
+            entry.set_text("");
+            window.minimize();
+        }),
+    );
 }
