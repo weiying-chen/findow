@@ -10,7 +10,6 @@ use gtk::{
 };
 
 use std::cell::RefCell;
-use std::process::Command;
 use std::rc::Rc;
 
 const APP_ID: &str = "com.weiyingchen.ui-demo";
@@ -72,20 +71,15 @@ fn build_ui(app: &Application) {
 
     window.set_title(Some(WINDOW_NAME));
     window.set_child(Some(&vbox));
+    window.set_decorated(false);
 
     window.connect_show(clone!(@weak window => move |_| {
         std::thread::sleep(std::time::Duration::from_secs(1)); // add a delay of 1 second
-        // let window_id = xdotool::search(WINDOW_NAME, "--name");
 
-        let command = format!("xdotool search --onlyvisible --name {}", WINDOW_NAME);
-
-        let window_id = Command::new("sh").arg("-c").arg(command).output();
-
-
-        // let window_id = xdotool::search(WINDOW_NAME, "--name");
+        let window_id = xdotool::search_windows("--name", WINDOW_NAME);
 
         println!("window_id: {:?}", window_id);
-        // xdotool::center_window(&window_id.join(", "));
+        xdotool::center_window(&window_id.join(", "));
     }));
 
     window.show();

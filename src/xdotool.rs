@@ -81,7 +81,7 @@ pub fn search_windows(options: &str, pattern: &str) -> Vec<String> {
 }
 
 pub fn center_window(window_id: &str) {
-    let command = format!("xdotool windowmove {} 780 400", window_id);
+    let command = format!("xdotool windowmove {} 680 400", window_id);
 
     run_command(&command).map_or_else(
         |err| {
