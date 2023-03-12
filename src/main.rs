@@ -4,6 +4,8 @@ use gtk::glib;
 use gtk::prelude::*;
 use ui_demo::xdotool;
 
+use ui_demo::constants::{APP_ID, WINDOW_NAME, WINDOW_WIDTH};
+
 use gtk::{
     Application, ApplicationWindow, Box as Box_, CssProvider, Entry, Label, ListBox, Orientation,
     StyleContext, STYLE_PROVIDER_PRIORITY_APPLICATION,
@@ -11,8 +13,6 @@ use gtk::{
 
 use std::cell::RefCell;
 use std::rc::Rc;
-
-const APP_ID: &str = "com.weiyingchen.ui-demo";
 
 fn main() -> glib::ExitCode {
     let app = Application::new(Some(APP_ID), Default::default());
@@ -67,12 +67,10 @@ fn build_ui(app: &Application) {
 
     let window = ApplicationWindow::new(app);
 
-    const WINDOW_NAME: &str = "CSS";
-
     window.set_title(Some(WINDOW_NAME));
     window.set_child(Some(&vbox));
     window.set_decorated(false);
-    window.set_default_size(800, -1);
+    window.set_default_size(WINDOW_WIDTH, -1);
 
     window.connect_show(clone!(@weak window => move |_| {
         std::thread::sleep(std::time::Duration::from_secs(1)); // add a delay of 1 second

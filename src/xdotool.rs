@@ -3,6 +3,8 @@ use std::{
     process::{Command, Output},
 };
 
+use crate::constants::WINDOW_WIDTH;
+
 #[derive(Debug)]
 enum CommandError {
     ExecutionError {
@@ -99,7 +101,8 @@ pub fn center_window(window_id: &str) {
         .collect::<Vec<i32>>();
 
     let screen_width = dimensions[0];
-    let window_width = 800;
+
+    let window_width = WINDOW_WIDTH;
     let x = (screen_width - window_width) / 2;
     let y = 100;
     let command = format!("xdotool windowmove {} {} {}", window_id, x, y);
