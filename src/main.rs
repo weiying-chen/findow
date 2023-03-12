@@ -72,6 +72,7 @@ fn build_ui(app: &Application) {
     window.set_title(Some(WINDOW_NAME));
     window.set_child(Some(&vbox));
     window.set_decorated(false);
+    window.set_default_size(800, -1);
 
     window.connect_show(clone!(@weak window => move |_| {
         std::thread::sleep(std::time::Duration::from_secs(1)); // add a delay of 1 second

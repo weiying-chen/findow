@@ -81,7 +81,28 @@ pub fn search_windows(options: &str, pattern: &str) -> Vec<String> {
 }
 
 pub fn center_window(window_id: &str) {
-    let command = format!("xdotool windowmove {} 680 400", window_id);
+    let command = format!("xdpyinfo | grep dimensions | awk '{{print $2}}'");
+
+    let output = run_command(&command).map_or_else(
+        |err| {
+            eprintln!("Command: {}", command);
+            eprintln!("Error: \n{}", err);
+            String::new()
+        },
+        |output| String::from_utf8_lossy(&output.stdout).trim().to_owned(),
+    );
+
+    let dimensions = output
+        .trim()
+        .split("x")
+        .map(|s| s.parse::<i32>().unwrap())
+        .collect::<Vec<i32>>();
+
+    let screen_width = dimensions[0];
+    let window_width = 800;
+    let x = (screen_width - window_width) / 2;
+    let y = 100;
+    let command = format!("xdotool windowmove {} {} {}", window_id, x, y);
 
     run_command(&command).map_or_else(
         |err| {
