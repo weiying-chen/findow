@@ -107,13 +107,10 @@ pub fn center_window(window_id: &str) {
     let y = 100;
     let command = format!("xdotool windowmove {} {} {}", window_id, x, y);
 
-    run_command(&command).map_or_else(
-        |err| {
-            eprintln!("Command: {}", command);
-            eprintln!("Error: \n{}", err);
-        },
-        |_| (),
-    )
+    if let Err(err) = run_command(&command) {
+        eprintln!("Command: {}", command);
+        eprintln!("Error: \n{}", err);
+    }
 }
 
 pub fn get_window_name(window_id: &str) -> String {
@@ -132,11 +129,8 @@ pub fn get_window_name(window_id: &str) -> String {
 pub fn activate_window(window_id: &str) {
     let command = format!("xdotool windowactivate {}", window_id);
 
-    run_command(&command).map_or_else(
-        |err| {
-            eprintln!("Command: {}", command);
-            eprintln!("Error: \n{}", err);
-        },
-        |_| (),
-    )
+    if let Err(err) = run_command(&command) {
+        eprintln!("Command: {}", command);
+        eprintln!("Error: \n{}", err);
+    }
 }
