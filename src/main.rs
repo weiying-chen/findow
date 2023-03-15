@@ -2,9 +2,9 @@ use glib::clone;
 use gtk::gdk::Display;
 use gtk::glib;
 use gtk::prelude::*;
-use ui_demo::xdotool;
+use window_switcher::xdotool;
 
-use ui_demo::constants::{APP_ID, WINDOW_NAME, WINDOW_WIDTH};
+use window_switcher::constants::{APP_ID, WINDOW_NAME, WINDOW_WIDTH};
 
 use gtk::{
     Application, ApplicationWindow, Box as Box_, CssProvider, Entry, Label, ListBox, Orientation,
@@ -73,9 +73,10 @@ fn build_ui(app: &Application) {
     window.set_default_size(WINDOW_WIDTH, -1);
 
     window.connect_show(clone!(@weak window => move |_| {
-        std::thread::sleep(std::time::Duration::from_secs(1)); // add a delay of 1 second
+        std::thread::sleep(std::time::Duration::from_secs(1));
 
-        let window_id = xdotool::search_windows("--name", WINDOW_NAME);
+        let window_name = format!("\"{}\"", WINDOW_NAME);
+        let window_id = xdotool::search_windows("--name", &window_name);
 
         println!("window_id: {:?}", window_id);
         xdotool::center_window(&window_id.join(", "));
