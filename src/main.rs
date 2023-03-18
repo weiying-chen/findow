@@ -78,7 +78,6 @@ fn build_ui(app: &Application) {
         let window_name = format!("\"{}\"", WINDOW_NAME);
         let window_id = xdotool::search_windows("--name", &window_name);
 
-        println!("window_id: {:?}", window_id);
         xdotool::center_window(&window_id.join(", "));
     }));
 
