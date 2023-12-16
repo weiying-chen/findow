@@ -10,7 +10,7 @@ Switch windows in the GNOME desktop environment by typing the window's name.
 
 [xdotool](https://github.com/jordansissel/xdotool) needs to be installed:
 
-```shell
+```bash
 # Ubuntu
 sudo apt-get install xdotool
 
