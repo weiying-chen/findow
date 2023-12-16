@@ -21,15 +21,12 @@ sudo dnf install xdotool
 sudo pacman -S xdotool
 ```
 
-## Quick start
+## Usage
 
-```shell
+```bash
+# Run app
 cargo run
-```
 
-or
-
-```shell
+# Build app for production
 cargo build --release
-./target/release/window-switcher
 ```
