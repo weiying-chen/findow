@@ -3,7 +3,7 @@
 Switch windows in the GNOME desktop environment by typing the window's name.
 
 
-![](https://github.com/weiying-chen/window-switcher/blob/main/demo.gif)
+![](https://github.com/weiying-chen/findow/blob/main/demo.gif)
 
 
 ## Dependencies
